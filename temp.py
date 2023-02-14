@@ -12,7 +12,8 @@ class node:
         self.obstacle = False
 
 def A_star(maze, start: node, goal: node):
-
+    #return a path found by A* and the resulting node
+    
     open_list = []
     heapq.heappush(open_list, (0, start))
     closed_list = {}
@@ -22,20 +23,58 @@ def A_star(maze, start: node, goal: node):
 
     while not open_list:
         (_, curr) = heapq.heappop(open_list)
+
         if curr == goal:
+            #the goal is found
             break
-    return None
+        
+        elif not get_neighbors(curr): 
+            #run into obstacles
+            break
+
+        for next in get_neighbors(curr):
+            new_cost = cost_so_far[curr] + 1
+            if next not in cost_so_far or new_cost < cost_so_far[next]:
+                cost_so_far[next] = new_cost
+                priority = new_cost + h(curr,goal)
+                heapq.heappush(open_list, (priority, next))
+                closed_list[next] = curr
+    end = curr
+    path = []
+    curr = goal
+    while curr != start:
+        path.append(curr)
+        curr = closed_list[curr]
+    path.append(start)
+    path.reverse
+    return path, end
+
+def h(start: node, goal: node):
+
+    #get heuristic by calculating manhattan distances
+    return abs(start.x - goal.x) + abs(start.y - goal.y)
 
 def get_neighbors(maze, agent: node):
 
+    #return valid neighbors of current agent in four directions
     neighbors = []
     if agent.x < len(maze)-1:
-        neighbors.append(maze[agent.x+1][agent.y])
+        if not maze[agent.x+1][agent.y].obstacle :
+            neighbors.append(maze[agent.x+1][agent.y])
     if agent.x > 0:
-        neighbors.append(maze[agent.x-1][agent.y])
+        if not maze[agent.x-1][agent.y]: 
+            neighbors.append(maze[agent.x-1][agent.y])
+    if agent.y < len(maze[0])-1:
+        if not maze[agent.x][agent.y+1]: 
+            neighbors.append(maze[agent.x][agent.y+1])
+    if agent.y > 0: 
+        if not maze[agent.x][agent.y-1]: 
+            neighbors.append(maze[agent.x][agent.y-1])
+    return neighbors
 
 def generate_maze(rows: int, cols: int):
-
+    
+    #generate a maze by randomly choose 20% of the grid to be obstacles using randint
     maze = []
 
     for r in range(rows):
