@@ -11,23 +11,31 @@ class node:
         self.prev = None
         self.obstacle = False
 
-def A_star(maze, start, goal):
+def A_star(maze, start: node, goal: node):
 
     open_list = []
-    heapq.heappush()
+    heapq.heappush(open_list, (0, start))
     closed_list = {}
     cost_so_far = {}
     closed_list[start] = None
     cost_so_far[start] = 0
 
-    open_list[start_node] = None
-    current_node = start_node
-    while len(open_list) > 0:
-        for key in open_list:
-            if key.f < 
+    while not open_list:
+        (_, curr) = heapq.heappop(open_list)
+        if curr == goal:
+            break
     return None
 
-def generate_maze(rows, cols):
+def get_neighbors(maze, agent: node):
+
+    neighbors = []
+    if agent.x < len(maze)-1:
+        neighbors.append(maze[agent.x+1][agent.y])
+    if agent.x > 0:
+        neighbors.append(maze[agent.x-1][agent.y])
+
+def generate_maze(rows: int, cols: int):
+
     maze = []
 
     for r in range(rows):
@@ -56,10 +64,7 @@ maze = generate_maze(10,10)
 display_maze(maze)
 temp = []
 heapq.heappush(temp, (0,maze[0][0]))
-print(maze[0][0].x)
-print(maze[0][0].y)
 heapq.heappush(temp,(1,maze[0][1]))
-print(list(temp))
 (_,a)=heapq.heappop(temp)
-print(a.x)
-print(a.y)
+print(len(temp))
+(_,a)=heapq.heappop(temp)
