@@ -17,28 +17,30 @@ def A_star(maze, start: node, goal: node):
     open_list = []
     heapq.heappush(open_list, (0, start))
     closed_list = {}
-    cost_so_far = {}
     closed_list[start] = None
+    cost_so_far = {}
     cost_so_far[start] = 0
 
-    while not open_list:
-        (_, curr) = heapq.heappop(open_list)
-
+    while open_list:
+        (priority, curr) = heapq.heappop(open_list)
+        display_maze(maze, curr, goal)
+        print(len(get_neighbors(maze, curr)))
         if curr == goal:
             #the goal is found
             break
         
-        elif not get_neighbors(curr): 
+        elif not get_neighbors(maze, curr): 
             #run into obstacles
             break
 
-        for next in get_neighbors(curr):
-            new_cost = cost_so_far[curr] + 1
-            if next not in cost_so_far or new_cost < cost_so_far[next]:
-                cost_so_far[next] = new_cost
-                priority = new_cost + h(curr,goal)
+        for next in get_neighbors(maze, curr):
+            new_g = cost_so_far[curr] + 1
+            if next not in cost_so_far or new_g < cost_so_far[next]:
+                cost_so_far[next] = new_g
+                priority = new_g + h(curr,goal)
                 heapq.heappush(open_list, (priority, next))
                 closed_list[next] = curr
+    print('?')
     end = curr
     path = []
     curr = goal
@@ -91,19 +93,19 @@ def generate_maze(rows: int, cols: int):
             
     return maze
 
-def display_maze(maze):
+def display_maze(maze, current, goal):
     for r in maze:
         for c in r:
-            if c.obstacle:
+            if c == current:
+                print('#', end=' ')
+            elif c == goal:
+                print('@', end=' ')
+            elif c.obstacle:
                 print('*', end=' ')
             else:
                 print('^', end=' ')
         print()
+    print()
 maze = generate_maze(10,10)
-display_maze(maze)
-temp = []
-heapq.heappush(temp, (0,maze[0][0]))
-heapq.heappush(temp,(1,maze[0][1]))
-(_,a)=heapq.heappop(temp)
-print(len(temp))
-(_,a)=heapq.heappop(temp)
+display_maze(maze, maze[0][0], maze[9][9])
+A_star(maze, maze[0][0], maze[9][9])
