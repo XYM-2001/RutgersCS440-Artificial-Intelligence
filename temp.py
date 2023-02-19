@@ -22,7 +22,7 @@ class Heap:
     
     def isLeaf(self, pos):
         return pos*2 > self.size
-        
+
     def swap(self, fpos, spos):
         self.Heap[fpos], self.Heap[spos] = self.Heap[spos], self.Heap[fpos]
 
@@ -40,7 +40,18 @@ class Heap:
             current = self.parent(current)
     
     def minHeapify(self, pos):
-        if not self.isLeaf
+        if not self.isLeaf(pos):
+            if (self.Heap[pos][0] > self.Heap[self.leftchild(pos)][0] or 
+                self.Heap[pos][0] > self.Heap[self.rightchild(pos)][0]):
+                
+                if self.Heap[self.leftchild(pos)][0] < self.Heap[self.rightchild(pos)][0]:
+                    self.swap(pos, self.leftchild(pos))
+                    self.minHeapify(self.leftchild(pos))
+
+                else:
+                    self.swap(pos, self.rightchild(pos))
+                    self.minHeapify(self.rightchild(pos))
+
     def pop(self):
 
         popped = self.Heap[self.FRONT]
