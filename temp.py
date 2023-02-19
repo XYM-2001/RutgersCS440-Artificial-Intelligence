@@ -1,6 +1,50 @@
 from random import randint
 import heapq
+import sys
 
+class Heap:
+    
+    def __init__(self, maxsize) -> None:
+        self.maxsize = maxsize
+        self.size = 0
+        self.Heap = [0]*(self.maxsize + 1)
+        self.Heap[0] = -1 * sys.maxsize
+        self.FRONT = 1
+    
+    def parent(self, pos):
+        return pos//2
+
+    def swap(self, fpos, spos):
+        self.Heap[fpos], self.Heap[spos] = self.Heap[spos], self.Heap[fpos]
+
+    def push(self, element):
+
+        if self.size >= self.maxsize:
+            return 
+        self.size += 1
+        self.Heap[self.size] = element
+        
+        current = self.size
+
+        while self.Heap[current][0] < self.Heap[self.parent(current)][0]:
+            self.swap(current, self.parent(current))
+            current = self.parent(current)
+    
+    def minHeapify(self, pos):
+        
+    def pop(self):
+
+        popped = self.Heap[self.FRONT]
+        self.Heap[self.FRONT] = self.Heap[self.size]
+        self.size -= 1
+        self.minHeapify(self.FRONT)
+        return popped
+
+    def Print(self):
+        for i in range(1, (self.size//2)+1):
+            print(' parent : ' + str(self.Heap[i][0]) + ' left child : ' + 
+                                str(self.Heap[2*i][0]) + ' right child : '+ 
+                                str(self.Heap[2*i+i]))
 class node:
     def __init__(self, x, y) -> None:
         self.x = x
@@ -24,7 +68,7 @@ def A_star(maze, start: node, goal: node):
     while open_list:
         (priority, curr) = heapq.heappop(open_list)
         display_maze(maze, curr, goal)
-        print(len(get_neighbors(maze, curr)))
+        #print(len(get_neighbors(maze, curr)))
         if curr == goal:
             #the goal is found
             break
@@ -64,13 +108,13 @@ def get_neighbors(maze, agent: node):
         if not maze[agent.x+1][agent.y].obstacle :
             neighbors.append(maze[agent.x+1][agent.y])
     if agent.x > 0:
-        if not maze[agent.x-1][agent.y]: 
+        if not maze[agent.x-1][agent.y].obstacle: 
             neighbors.append(maze[agent.x-1][agent.y])
     if agent.y < len(maze[0])-1:
-        if not maze[agent.x][agent.y+1]: 
+        if not maze[agent.x][agent.y+1].obstacle: 
             neighbors.append(maze[agent.x][agent.y+1])
     if agent.y > 0: 
-        if not maze[agent.x][agent.y-1]: 
+        if not maze[agent.x][agent.y-1].obstacle: 
             neighbors.append(maze[agent.x][agent.y-1])
     return neighbors
 
@@ -107,5 +151,13 @@ def display_maze(maze, current, goal):
         print()
     print()
 maze = generate_maze(10,10)
-display_maze(maze, maze[0][0], maze[9][9])
-A_star(maze, maze[0][0], maze[9][9])
+temp = Heap(100)
+temp.push
+#A_star(maze, maze[0][0], maze[9][9])
+# display_maze(maze, maze[0][0], maze[9][9])
+# print(len(get_neighbors(maze, maze[0][0])))
+# temp = []
+# heapq.heappush(temp,(1,maze[0][0]))
+# heapq.heappush(temp,(2,maze[0][1]))
+# heapq.heappush(temp,(3,maze[0][2]))
+# print(list(temp))
