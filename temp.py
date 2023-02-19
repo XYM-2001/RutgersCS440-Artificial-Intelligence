@@ -8,7 +8,7 @@ class Heap:
         self.maxsize = maxsize
         self.size = 0
         self.Heap = [0]*(self.maxsize + 1)
-        self.Heap[0] = -1 * sys.maxsize
+        self.Heap[0] = (-1 * sys.maxsize, node(0,0))
         self.FRONT = 1
     
     def parent(self, pos):
@@ -172,7 +172,10 @@ def display_maze(maze, current, goal):
     print()
 maze = generate_maze(10,10)
 temp = Heap(100)
-temp.push
+temp.push((0, maze[0][0]))
+temp.push((10, maze[1,1]))
+temp.push((20, maze[2][2]))
+temp.Print()
 #A_star(maze, maze[0][0], maze[9][9])
 # display_maze(maze, maze[0][0], maze[9][9])
 # print(len(get_neighbors(maze, maze[0][0])))
