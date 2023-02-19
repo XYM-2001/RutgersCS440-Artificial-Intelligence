@@ -64,7 +64,7 @@ class Heap:
         for i in range(1, (self.size//2)+1):
             print(' parent : ' + str(self.Heap[i][0]) + ' left child : ' + 
                                 str(self.Heap[2*i][0]) + ' right child : '+ 
-                                str(self.Heap[2*i+i]))
+                                str(self.Heap[2*i+i][0]))
 class node:
     def __init__(self, x, y) -> None:
         self.x = x
@@ -173,9 +173,10 @@ def display_maze(maze, current, goal):
 maze = generate_maze(10,10)
 temp = Heap(100)
 temp.push((0, maze[0][0]))
-temp.push((10, maze[1,1]))
+temp.push((10, maze[1][1]))
 temp.push((20, maze[2][2]))
 temp.Print()
+print(temp.pop())
 #A_star(maze, maze[0][0], maze[9][9])
 # display_maze(maze, maze[0][0], maze[9][9])
 # print(len(get_neighbors(maze, maze[0][0])))
