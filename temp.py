@@ -14,6 +14,15 @@ class Heap:
     def parent(self, pos):
         return pos//2
 
+    def leftchild(self, pos):
+        return 2*pos
+
+    def rightchild(self, pos):
+        return (2*pos)+1
+    
+    def isLeaf(self, pos):
+        return pos*2 > self.size
+        
     def swap(self, fpos, spos):
         self.Heap[fpos], self.Heap[spos] = self.Heap[spos], self.Heap[fpos]
 
@@ -31,7 +40,7 @@ class Heap:
             current = self.parent(current)
     
     def minHeapify(self, pos):
-        
+        if not self.isLeaf
     def pop(self):
 
         popped = self.Heap[self.FRONT]
