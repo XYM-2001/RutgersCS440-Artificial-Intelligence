@@ -87,7 +87,7 @@ def A_star(maze, start: node, goal: node):
     open_list = Heap(1000)
 
     # heapq.heappush(open_list, (0, start))
-    open_list.push((0, start))
+    open_list.push((h(start, goal), start))
     
     closed_list = {}
     closed_list[start] = None
@@ -123,7 +123,6 @@ def A_star(maze, start: node, goal: node):
         path.append(curr)
         curr = closed_list[curr]
     path.append(start)
-    path.reverse
     return path
 
 def h(start: node, goal: node):
@@ -185,44 +184,56 @@ def display_maze(maze, path, goal):
                 print('^', end=' ')
         print()
     print()
-maze,agent_maze = generate_maze(10,10)
+
+# def main():
+#     args = sys.argv[1:]
+#     maze_size = args[0]
+
+# if __name__=="__main__":
+#     main()
+orig_stdout = sys.stdout
+f = open('output.txt', 'w')
+sys.stdout = f
+maze,agent_maze = generate_maze(101,101)
 curr_start = agent_maze[0][0]
-goal = agent_maze[9][9]
-# if maze[0][1].obstacle: 
-#     agent_maze[0][1].obstacle = True
-# if maze[1][0].obstacle:
-#     agent_maze[1][0].obstacle = True
-# path = A_star(agent_maze, agent_maze[0][0], agent_maze[9][9])
-# display_maze(agent_maze, path, agent_maze[9][9])
+goal = agent_maze[100][100]
+
+if maze[curr_start.x][curr_start.y].obstacle:
+    sys.exit('Starting from an obstacle')
 
 path = [curr_start]
-# display_maze(agent_maze, path, goal)
+
 display_maze(maze, [None], None)
-count = 0
 while True:
-    count += 1
     while path:
 
-        temp = path.pop(0)
+        temp = path.pop(-1)
         if maze[temp.x][temp.y].obstacle:
-            break
+            if temp == goal:
+                curr_start = temp
+                break
+            else:
+                agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
+                break
 
         curr_start = temp
 
         if curr_start.x < len(agent_maze)-1:
+            #add right block
             agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
         if curr_start.x > 0:
+            #add left block
             agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
         if curr_start.y < len(agent_maze[0])-1:
+            #add down block
             agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
         if curr_start.y > 0: 
+            #add up block
             agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
-        
-    
+    path = A_star(agent_maze, curr_start, goal)
+    display_maze(agent_maze, path, goal)
     if curr_start == goal:
-        break
         print('found!')
-    # path = A_star(agent_maze, curr_start, goal)
-    # display_maze(agent_maze, path, goal)
-    if count > 3:
         break
+sys.stdout = orig_stdout
+f.close()
