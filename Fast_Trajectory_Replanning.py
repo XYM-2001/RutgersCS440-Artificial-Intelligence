@@ -191,10 +191,13 @@ def display_maze(maze, path, goal):
 
 # if __name__=="__main__":
 #     main()
+
 orig_stdout = sys.stdout
 f = open('output.txt', 'w')
 sys.stdout = f
 maze,agent_maze = generate_maze(101,101)
+
+#forward A* execution
 curr_start = agent_maze[0][0]
 goal = agent_maze[100][100]
 
@@ -202,8 +205,11 @@ if maze[curr_start.x][curr_start.y].obstacle:
     sys.exit('Starting from an obstacle')
 
 path = [curr_start]
-
+final_path = []
+print('original maze:')
 display_maze(maze, [None], None)
+print()
+print('forward A*: ')
 while True:
     while path:
 
@@ -217,7 +223,7 @@ while True:
                 break
 
         curr_start = temp
-
+        final_path.append(curr_start)
         if curr_start.x < len(agent_maze)-1:
             #add right block
             agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
@@ -231,9 +237,16 @@ while True:
             #add up block
             agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
     path = A_star(agent_maze, curr_start, goal)
+    print('current state:')
     display_maze(agent_maze, path, goal)
+    print()
     if curr_start == goal:
         print('found!')
         break
+print('final path:')
+display_maze(agent_maze, final_path, goal)
+
+
+
 sys.stdout = orig_stdout
 f.close()
