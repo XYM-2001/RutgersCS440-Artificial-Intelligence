@@ -104,9 +104,9 @@ def A_star(maze, start: node, goal: node):
             #the goal is found
             break
         
-        elif not get_neighbors(maze, curr): 
-            #run into obstacles
-            break
+        # elif not get_neighbors(maze, curr): 
+        #     #run into obstacles
+        #     break
 
         for next in get_neighbors(maze, curr):
             new_g = cost_so_far[curr] + 1
@@ -195,11 +195,11 @@ def display_maze(maze, path, goal):
 orig_stdout = sys.stdout
 f = open('output.txt', 'w')
 sys.stdout = f
-maze,agent_maze = generate_maze(101,101)
+maze,agent_maze = generate_maze(10,10)
 
 #forward A* execution
 curr_start = agent_maze[0][0]
-goal = agent_maze[100][100]
+goal = agent_maze[9][9]
 
 if maze[curr_start.x][curr_start.y].obstacle:
     sys.exit('Starting from an obstacle')
@@ -244,10 +244,13 @@ while True:
         print('found!')
         break
 print('final path:')
+final_path = list(set(final_path))
 display_maze(agent_maze, final_path, goal)
+print('path length: ' + str(len(final_path)))
 
 #Backward A* execution
-curr_start = agent_maze[100][100]
+_,agent_maze = generate_maze(10,10)
+curr_start = agent_maze[9][9]
 goal = agent_maze[0][0]
 
 if maze[curr_start.x][curr_start.y].obstacle:
@@ -293,7 +296,9 @@ while True:
         print('found!')
         break
 print('final path:')
+final_path = list(set(final_path))
 display_maze(agent_maze, final_path, goal)
+print('path length: ' + str(len(final_path)))
 
 sys.stdout = orig_stdout
 f.close()
