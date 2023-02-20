@@ -52,6 +52,11 @@ class Heap:
                     self.swap(pos, self.rightchild(pos))
                     self.minHeapify(self.rightchild(pos))
 
+    def isEmpty(self):
+        if self.size == 0:
+            return True
+        return False
+
     def pop(self):
 
         popped = self.Heap[self.FRONT]
@@ -78,16 +83,22 @@ class node:
 def A_star(maze, start: node, goal: node):
     #return a path found by A* and the resulting node
     
-    open_list = []
-    heapq.heappush(open_list, (0, start))
+    # open_list = []
+    open_list = Heap(1000)
+
+    # heapq.heappush(open_list, (0, start))
+    open_list.push((0, start))
+    
     closed_list = {}
     closed_list[start] = None
     cost_so_far = {}
     cost_so_far[start] = 0
 
-    while open_list:
-        (priority, curr) = heapq.heappop(open_list)
-        display_maze(maze, curr, goal)
+    while not open_list.isEmpty():
+        # (priority, curr) = heapq.heappop(open_list)
+        (priority, curr) = open_list.pop()
+
+        # display_maze(maze, curr, goal)
         #print(len(get_neighbors(maze, curr)))
         if curr == goal:
             #the goal is found
@@ -102,9 +113,9 @@ def A_star(maze, start: node, goal: node):
             if next not in cost_so_far or new_g < cost_so_far[next]:
                 cost_so_far[next] = new_g
                 priority = new_g + h(curr,goal)
-                heapq.heappush(open_list, (priority, next))
+                # heapq.heappush(open_list, (priority, next))
+                open_list.push((priority, next))
                 closed_list[next] = curr
-    print('?')
     end = curr
     path = []
     curr = goal
@@ -113,7 +124,7 @@ def A_star(maze, start: node, goal: node):
         curr = closed_list[curr]
     path.append(start)
     path.reverse
-    return path, end
+    return path
 
 def h(start: node, goal: node):
 
@@ -141,26 +152,30 @@ def get_neighbors(maze, agent: node):
 def generate_maze(rows: int, cols: int):
     
     #generate a maze by randomly choose 20% of the grid to be obstacles using randint
+    agent_maze = []
     maze = []
 
     for r in range(rows):
+        agent_maze.append([])
         maze.append([])
         for c in range(cols):
             maze[-1].append(0)
+            agent_maze[-1].append(0)
     
     for i in range(rows):
         for j in range(cols):
+            agent_maze[i][j] = node(i,j)
             maze[i][j] = node(i,j)
             rand = randint(0,100)
             if rand < 20:
                 maze[i][j].obstacle = True
             
-    return maze
+    return maze, agent_maze
 
-def display_maze(maze, current, goal):
+def display_maze(maze, path, goal):
     for r in maze:
         for c in r:
-            if c == current:
+            if c in path:
                 print('#', end=' ')
             elif c == goal:
                 print('@', end=' ')
@@ -170,18 +185,44 @@ def display_maze(maze, current, goal):
                 print('^', end=' ')
         print()
     print()
-maze = generate_maze(10,10)
-temp = Heap(100)
-temp.push((0, maze[0][0]))
-temp.push((10, maze[1][1]))
-temp.push((20, maze[2][2]))
-temp.Print()
-print(temp.pop())
-#A_star(maze, maze[0][0], maze[9][9])
-# display_maze(maze, maze[0][0], maze[9][9])
-# print(len(get_neighbors(maze, maze[0][0])))
-# temp = []
-# heapq.heappush(temp,(1,maze[0][0]))
-# heapq.heappush(temp,(2,maze[0][1]))
-# heapq.heappush(temp,(3,maze[0][2]))
-# print(list(temp))
+maze,agent_maze = generate_maze(10,10)
+curr_start = agent_maze[0][0]
+goal = agent_maze[9][9]
+# if maze[0][1].obstacle: 
+#     agent_maze[0][1].obstacle = True
+# if maze[1][0].obstacle:
+#     agent_maze[1][0].obstacle = True
+# path = A_star(agent_maze, agent_maze[0][0], agent_maze[9][9])
+# display_maze(agent_maze, path, agent_maze[9][9])
+
+path = [curr_start]
+# display_maze(agent_maze, path, goal)
+display_maze(maze, [None], None)
+count = 0
+while True:
+    count += 1
+    while path:
+
+        temp = path.pop(0)
+        if maze[temp.x][temp.y].obstacle:
+            break
+
+        curr_start = temp
+
+        if curr_start.x < len(agent_maze)-1:
+            agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
+        if curr_start.x > 0:
+            agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
+        if curr_start.y < len(agent_maze[0])-1:
+            agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
+        if curr_start.y > 0: 
+            agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
+        
+    
+    if curr_start == goal:
+        break
+        print('found!')
+    # path = A_star(agent_maze, curr_start, goal)
+    # display_maze(agent_maze, path, goal)
+    if count > 3:
+        break
