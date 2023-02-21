@@ -110,10 +110,10 @@ class node:
     def __init__(self, x, y) -> None:
         self.x = x
         self.y = y
-        self.f = 0
-        self.g = 0
         self.h = 0
-        self.prev = None
+        # self.f = 0
+        # self.g = 0
+        # self.prev = None
         self.obstacle = False
 
 def A_star(maze, start: node, goal: node):
@@ -123,7 +123,7 @@ def A_star(maze, start: node, goal: node):
     open_list = Heap(1000)
 
     # heapq.heappush(open_list, (0, start))
-    open_list.push((h(start, goal), 0, start))
+    open_list.push((start.h, 0, start))
     
     closed_list = {}
     closed_list[start] = None
@@ -148,11 +148,10 @@ def A_star(maze, start: node, goal: node):
             new_g = cost_so_far[curr] + 1
             if next not in cost_so_far or new_g < cost_so_far[next]:
                 cost_so_far[next] = new_g
-                priority = new_g + h(curr,goal)
+                priority = new_g + curr.h
                 # heapq.heappush(open_list, (priority, next))
                 open_list.push((priority, new_g, next))
                 closed_list[next] = curr
-    end = curr
     path = []
     curr = goal
     while curr != start:
@@ -161,10 +160,56 @@ def A_star(maze, start: node, goal: node):
     path.append(start)
     return path
 
-def h(start: node, goal: node):
+def adaptive_A_star(maze, start: node, goal: node):
+    #return a path found by A* and the resulting node
+    
+    # open_list = []
+    open_list = Heap(1000)
 
-    #get heuristic by calculating manhattan distances
-    return abs(start.x - goal.x) + abs(start.y - goal.y)
+    # heapq.heappush(open_list, (0, start))
+    open_list.push((start.h, 0, start))
+    
+    closed_list = {}
+    closed_list[start] = None
+    cost_so_far = {}
+    cost_so_far[start] = 0
+
+    while not open_list.isEmpty():
+        # (priority, curr) = heapq.heappop(open_list)
+        (priority, _, curr) = open_list.pop()
+
+        # display_maze(maze, curr, goal)
+        #print(len(get_neighbors(maze, curr)))
+        if curr == goal:
+            #the goal is found
+            break
+        
+        # elif not get_neighbors(maze, curr): 
+        #     #run into obstacles
+        #     break
+
+        for next in get_neighbors(maze, curr):
+            new_g = cost_so_far[curr] + 1
+            if next not in cost_so_far or new_g < cost_so_far[next]:
+                cost_so_far[next] = new_g
+                priority = new_g + curr.h
+                # heapq.heappush(open_list, (priority, next))
+                open_list.push((priority, new_g, next))
+                closed_list[next] = curr
+    path = []
+    curr = goal
+    for node in cost_so_far:
+        node.h = cost_so_far[goal] - cost_so_far[node]
+    while curr != start:
+        path.append(curr)
+        curr = closed_list[curr]
+    path.append(start)
+    return path
+
+# def h(start: node, goal: node):
+
+#     #get heuristic by calculating manhattan distances
+#     return abs(start.x - goal.x) + abs(start.y - goal.y)
 
 def get_neighbors(maze, agent: node):
 
@@ -221,127 +266,360 @@ def display_maze(maze, size, path, goal):
         print()
     print()
 
-# def main():
-#     args = sys.argv[1:]
-#     maze_size = args[0]
+def main():
+    size = 10
+    orig_stdout = sys.stdout
+    f = open('output.txt', 'w')
+    sys.stdout = f
+    maze,agent_maze = generate_maze(size)
 
-# if __name__=="__main__":
-#     main()
+    #forward A* execution
+    curr_start = agent_maze[0][0]
+    goal = agent_maze[size-1][size-1]
 
+    if maze[curr_start.x][curr_start.y].obstacle:
+        sys.exit('Starting from an obstacle')
 
+    for i in range(size):
+        for j in range(size):
+            agent_maze[i][j].h = abs(i - goal.x) + abs(j - goal.y)
 
-size = 10
-orig_stdout = sys.stdout
-f = open('output.txt', 'w')
-sys.stdout = f
-maze,agent_maze = generate_maze(size)
-
-#forward A* execution
-curr_start = agent_maze[0][0]
-goal = agent_maze[size-1][size-1]
-
-for i in range(size):
-    for j in range(size):
-        agent_maze[i][j].h = abs(i - goal.x) + abs(j - goal.y)
-
-if maze[curr_start.x][curr_start.y].obstacle:
-    sys.exit('Starting from an obstacle')
-
-path = [curr_start]
-final_path = []
-print('original maze:')
-display_maze(maze, size, [None], None)
-print()
-print('forward A*: ')
-while True:
-    while path:
-
-        temp = path.pop(-1)
-        if maze[temp.x][temp.y].obstacle:
-            if temp == goal:
-                curr_start = temp
-                break
-            else:
-                agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
-                break
-
-        curr_start = temp
-        final_path.append(curr_start)
-        if curr_start.x < len(agent_maze)-1:
-            #add right block
-            agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
-        if curr_start.x > 0:
-            #add left block
-            agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
-        if curr_start.y < len(agent_maze[0])-1:
-            #add down block
-            agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
-        if curr_start.y > 0: 
-            #add up block
-            agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
-    path = A_star(agent_maze, curr_start, goal)
-    print('current state:')
-    display_maze(agent_maze, size, path, goal)
+    path = [curr_start]
+    final_path = []
+    print('original maze:')
+    display_maze(maze, size, [None], None)
     print()
-    if curr_start == goal:
-        print('found!')
-        break
-print('final path:')
-final_path = list(set(final_path))
-display_maze(agent_maze, size, final_path, goal)
-print('path length: ' + str(len(final_path)))
+    print('forward A*: ')
+    while True:
+        while path:
 
-#Backward A* execution
-_,agent_maze = generate_maze(size)
-curr_start = agent_maze[size-1][size-1]
-goal = agent_maze[0][0]
+            temp = path.pop(-1)
+            if maze[temp.x][temp.y].obstacle:
+                if temp == goal:
+                    curr_start = temp
+                    break
+                else:
+                    agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
+                    break
 
-if maze[curr_start.x][curr_start.y].obstacle:
-    sys.exit('Starting from an obstacle')
+            curr_start = temp
+            final_path.append(curr_start)
+            if curr_start.x < len(agent_maze)-1:
+                #add right block
+                agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
+            if curr_start.x > 0:
+                #add left block
+                agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
+            if curr_start.y < len(agent_maze[0])-1:
+                #add down block
+                agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
+            if curr_start.y > 0: 
+                #add up block
+                agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
+        path = A_star(agent_maze, curr_start, goal)
+        print('current state:')
+        display_maze(agent_maze, size, path, goal)
+        print()
+        if curr_start == goal:
+            print('found!')
+            break
+    print('final path:')
+    final_path = list(set(final_path))
+    display_maze(agent_maze, size, final_path, goal)
+    print('path length: ' + str(len(final_path)))
 
-path = [curr_start]
-final_path = []
-print('original maze:')
-display_maze(maze, size, [None], None)
-print()
-print('backward A*: ')
-while True:
-    while path:
+    #Backward A* execution
+    _,agent_maze = generate_maze(size)
+    curr_start = agent_maze[size-1][size-1]
+    goal = agent_maze[0][0]
 
-        temp = path.pop(-1)
-        if maze[temp.x][temp.y].obstacle:
-            if temp == goal:
-                curr_start = temp
-                break
-            else:
-                agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
-                break
+    if maze[curr_start.x][curr_start.y].obstacle:
+        sys.exit('Starting from an obstacle')
 
-        curr_start = temp
-        final_path.append(curr_start)
-        if curr_start.x < len(agent_maze)-1:
-            #add right block
-            agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
-        if curr_start.x > 0:
-            #add left block
-            agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
-        if curr_start.y < len(agent_maze[0])-1:
-            #add down block
-            agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
-        if curr_start.y > 0: 
-            #add up block
-            agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
-    path = A_star(agent_maze, curr_start, goal)
-    print('current state:')
-    display_maze(agent_maze, size, path, goal)
+    for i in range(size):
+        for j in range(size):
+            agent_maze[i][j].h = abs(i - goal.x) + abs(j - goal.y)
+
+    path = [curr_start]
+    final_path = []
+    print('original maze:')
+    display_maze(maze, size, [None], None)
     print()
-    if curr_start == goal:
-        print('found!')
-        break
-print('final path:')
-final_path = list(set(final_path))
-display_maze(agent_maze, size, final_path, goal)
-print('path length: ' + str(len(final_path)))
+    print('backward A*: ')
+    while True:
+        while path:
 
-sys.stdout = orig_stdout
-f.close()
+            temp = path.pop(-1)
+            if maze[temp.x][temp.y].obstacle:
+                if temp == goal:
+                    curr_start = temp
+                    break
+                else:
+                    agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
+                    break
+
+            curr_start = temp
+            final_path.append(curr_start)
+            if curr_start.x < len(agent_maze)-1:
+                #add right block
+                agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
+            if curr_start.x > 0:
+                #add left block
+                agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
+            if curr_start.y < len(agent_maze[0])-1:
+                #add down block
+                agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
+            if curr_start.y > 0: 
+                #add up block
+                agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
+        path = A_star(agent_maze, curr_start, goal)
+        print('current state:')
+        display_maze(agent_maze, size, path, goal)
+        print()
+        if curr_start == goal:
+            print('found!')
+            break
+    print('final path:')
+    final_path = list(set(final_path))
+    display_maze(agent_maze, size, final_path, goal)
+    print('path length: ' + str(len(final_path)))
+
+    #adaptive A* execution
+    _,agent_maze = generate_maze(size)
+    curr_start = agent_maze[0][0]
+    goal = agent_maze[size-1][size-1]
+
+    if maze[curr_start.x][curr_start.y].obstacle:
+        sys.exit('Starting from an obstacle')
+
+    for i in range(size):
+        for j in range(size):
+            agent_maze[i][j].h = abs(i - goal.x) + abs(j - goal.y)
+
+    path = [curr_start]
+    final_path = []
+    print('original maze:')
+    display_maze(maze, size, [None], None)
+    print()
+    print('adaptive A*: ')
+    while True:
+        while path:
+
+            temp = path.pop(-1)
+            if maze[temp.x][temp.y].obstacle:
+                if temp == goal:
+                    curr_start = temp
+                    break
+                else:
+                    agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
+                    break
+
+            curr_start = temp
+            final_path.append(curr_start)
+            if curr_start.x < len(agent_maze)-1:
+                #add right block
+                agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
+            if curr_start.x > 0:
+                #add left block
+                agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
+            if curr_start.y < len(agent_maze[0])-1:
+                #add down block
+                agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
+            if curr_start.y > 0: 
+                #add up block
+                agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
+        path = A_star(agent_maze, curr_start, goal)
+        print('current state:')
+        display_maze(agent_maze, size, path, goal)
+        print()
+        if curr_start == goal:
+            print('found!')
+            break
+    print('final path:')
+    final_path = list(set(final_path))
+    display_maze(agent_maze, size, final_path, goal)
+    print('path length: ' + str(len(final_path)))
+
+    sys.stdout = orig_stdout
+    f.close()
+
+if __name__=="__main__":
+    main()
+
+
+
+# size = 10
+# orig_stdout = sys.stdout
+# f = open('output.txt', 'w')
+# sys.stdout = f
+# maze,agent_maze = generate_maze(size)
+
+# #forward A* execution
+# curr_start = agent_maze[0][0]
+# goal = agent_maze[size-1][size-1]
+
+# if maze[curr_start.x][curr_start.y].obstacle:
+#     sys.exit('Starting from an obstacle')
+
+# for i in range(size):
+#     for j in range(size):
+#         agent_maze[i][j].h = abs(i - goal.x) + abs(j - goal.y)
+
+# path = [curr_start]
+# final_path = []
+# print('original maze:')
+# display_maze(maze, size, [None], None)
+# print()
+# print('forward A*: ')
+# while True:
+#     while path:
+
+#         temp = path.pop(-1)
+#         if maze[temp.x][temp.y].obstacle:
+#             if temp == goal:
+#                 curr_start = temp
+#                 break
+#             else:
+#                 agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
+#                 break
+
+#         curr_start = temp
+#         final_path.append(curr_start)
+#         if curr_start.x < len(agent_maze)-1:
+#             #add right block
+#             agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
+#         if curr_start.x > 0:
+#             #add left block
+#             agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
+#         if curr_start.y < len(agent_maze[0])-1:
+#             #add down block
+#             agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
+#         if curr_start.y > 0: 
+#             #add up block
+#             agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
+#     path = A_star(agent_maze, curr_start, goal)
+#     print('current state:')
+#     display_maze(agent_maze, size, path, goal)
+#     print()
+#     if curr_start == goal:
+#         print('found!')
+#         break
+# print('final path:')
+# final_path = list(set(final_path))
+# display_maze(agent_maze, size, final_path, goal)
+# print('path length: ' + str(len(final_path)))
+
+# #Backward A* execution
+# _,agent_maze = generate_maze(size)
+# curr_start = agent_maze[size-1][size-1]
+# goal = agent_maze[0][0]
+
+# if maze[curr_start.x][curr_start.y].obstacle:
+#     sys.exit('Starting from an obstacle')
+
+# for i in range(size):
+#     for j in range(size):
+#         agent_maze[i][j].h = abs(i - goal.x) + abs(j - goal.y)
+
+# path = [curr_start]
+# final_path = []
+# print('original maze:')
+# display_maze(maze, size, [None], None)
+# print()
+# print('backward A*: ')
+# while True:
+#     while path:
+
+#         temp = path.pop(-1)
+#         if maze[temp.x][temp.y].obstacle:
+#             if temp == goal:
+#                 curr_start = temp
+#                 break
+#             else:
+#                 agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
+#                 break
+
+#         curr_start = temp
+#         final_path.append(curr_start)
+#         if curr_start.x < len(agent_maze)-1:
+#             #add right block
+#             agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
+#         if curr_start.x > 0:
+#             #add left block
+#             agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
+#         if curr_start.y < len(agent_maze[0])-1:
+#             #add down block
+#             agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
+#         if curr_start.y > 0: 
+#             #add up block
+#             agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
+#     path = A_star(agent_maze, curr_start, goal)
+#     print('current state:')
+#     display_maze(agent_maze, size, path, goal)
+#     print()
+#     if curr_start == goal:
+#         print('found!')
+#         break
+# print('final path:')
+# final_path = list(set(final_path))
+# display_maze(agent_maze, size, final_path, goal)
+# print('path length: ' + str(len(final_path)))
+
+# #adaptive A* execution
+# _,agent_maze = generate_maze(size)
+# curr_start = agent_maze[0][0]
+# goal = agent_maze[size-1][size-1]
+
+# if maze[curr_start.x][curr_start.y].obstacle:
+#     sys.exit('Starting from an obstacle')
+
+# for i in range(size):
+#     for j in range(size):
+#         agent_maze[i][j].h = abs(i - goal.x) + abs(j - goal.y)
+
+# path = [curr_start]
+# final_path = []
+# print('original maze:')
+# display_maze(maze, size, [None], None)
+# print()
+# print('adaptive A*: ')
+# while True:
+#     while path:
+
+#         temp = path.pop(-1)
+#         if maze[temp.x][temp.y].obstacle:
+#             if temp == goal:
+#                 curr_start = temp
+#                 break
+#             else:
+#                 agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
+#                 break
+
+#         curr_start = temp
+#         final_path.append(curr_start)
+#         if curr_start.x < len(agent_maze)-1:
+#             #add right block
+#             agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
+#         if curr_start.x > 0:
+#             #add left block
+#             agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
+#         if curr_start.y < len(agent_maze[0])-1:
+#             #add down block
+#             agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
+#         if curr_start.y > 0: 
+#             #add up block
+#             agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
+#     path = A_star(agent_maze, curr_start, goal)
+#     print('current state:')
+#     display_maze(agent_maze, size, path, goal)
+#     print()
+#     if curr_start == goal:
+#         print('found!')
+#         break
+# print('final path:')
+# final_path = list(set(final_path))
+# display_maze(agent_maze, size, final_path, goal)
+# print('path length: ' + str(len(final_path)))
+
+# sys.stdout = orig_stdout
+# f.close()
