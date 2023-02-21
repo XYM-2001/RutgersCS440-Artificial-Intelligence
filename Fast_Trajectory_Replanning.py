@@ -1,6 +1,8 @@
 from random import randint
 import heapq
 import sys
+import time
+
 
 class Heap:
     
@@ -154,6 +156,8 @@ def A_star(maze, start: node, goal: node):
                 closed_list[next] = curr
     path = []
     curr = goal
+    if goal not in closed_list:
+        sys.exit("Path doesn't exist!")
     while curr != start:
         path.append(curr)
         curr = closed_list[curr]
@@ -198,13 +202,13 @@ def adaptive_A_star(maze, start: node, goal: node):
                 closed_list[next] = curr
     path = []
     curr = goal
-    for node in cost_so_far:
-        node.h = cost_so_far[goal] - cost_so_far[node]
+    if goal not in closed_list:
+        sys.exit("Path doesn't exist!")
     while curr != start:
         path.append(curr)
         curr = closed_list[curr]
     path.append(start)
-    return path
+    return cost_so_far, path
 
 # def h(start: node, goal: node):
 
@@ -267,7 +271,7 @@ def display_maze(maze, size, path, goal):
     print()
 
 def main():
-    size = 10
+    size = 101
     orig_stdout = sys.stdout
     f = open('output.txt', 'w')
     sys.stdout = f
@@ -286,6 +290,7 @@ def main():
 
     path = [curr_start]
     final_path = []
+    start_time = time.time()
     print('original maze:')
     display_maze(maze, size, [None], None)
     print()
@@ -327,6 +332,7 @@ def main():
     final_path = list(set(final_path))
     display_maze(agent_maze, size, final_path, goal)
     print('path length: ' + str(len(final_path)))
+    print('Execution time: %s' % (time.time() - start_time))
 
     #Backward A* execution
     _,agent_maze = generate_maze(size)
@@ -398,6 +404,7 @@ def main():
 
     path = [curr_start]
     final_path = []
+    start_time = time.time()
     print('original maze:')
     display_maze(maze, size, [None], None)
     print()
@@ -428,7 +435,11 @@ def main():
             if curr_start.y > 0: 
                 #add up block
                 agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
-        path = A_star(agent_maze, curr_start, goal)
+        gs, path = adaptive_A_star(agent_maze, curr_start, goal)
+        for node in gs:
+            # print(agent_maze[node.x][node.y].h)
+            agent_maze[node.x][node.y].h = len(path) - gs[node]
+            # print(str(node.x) + ' ' + str(node.y) + ' ' + str(agent_maze[node.x][node.y].h))
         print('current state:')
         display_maze(agent_maze, size, path, goal)
         print()
@@ -439,6 +450,8 @@ def main():
     final_path = list(set(final_path))
     display_maze(agent_maze, size, final_path, goal)
     print('path length: ' + str(len(final_path)))
+    print('Execution time: %s' % (time.time() - start_time))
+
 
     sys.stdout = orig_stdout
     f.close()
