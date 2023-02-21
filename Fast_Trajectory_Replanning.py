@@ -8,7 +8,7 @@ class Heap:
         self.maxsize = maxsize
         self.size = 0
         self.Heap = [0]*(self.maxsize + 1)
-        self.Heap[0] = (-1 * sys.maxsize, node(0,0))
+        self.Heap[0] = (-1 * sys.maxsize, 0, node(0,0))
         self.FRONT = 1
     
     def parent(self, pos):
@@ -38,19 +38,55 @@ class Heap:
         while self.Heap[current][0] < self.Heap[self.parent(current)][0]:
             self.swap(current, self.parent(current))
             current = self.parent(current)
+        
+        if self.Heap[current][0] == self.Heap[self.parent(current)][0]:
+            while self.Heap[current][1] < self.Heap[self.parent(current)][1]:
+                self.swap(current, self.parent(current))
+                current = self.parent(current)
     
     def minHeapify(self, pos):
         if not self.isLeaf(pos):
             if (self.Heap[pos][0] > self.Heap[self.leftchild(pos)][0] or 
                 self.Heap[pos][0] > self.Heap[self.rightchild(pos)][0]):
                 
-                if self.Heap[self.leftchild(pos)][0] < self.Heap[self.rightchild(pos)][0]:
+                if self.Heap[self.leftchild(pos)][0] == self.Heap[self.rightchild(pos)][0]:
+                    if self.Heap[self.leftchild(pos)][1] > self.Heap[self.rightchild(pos)][1]:
+                        self.swap(pos, self.leftchild(pos))
+                        self.minHeapify(self.leftchild(pos))
+
+                    else:
+                        self.swap(pos, self.rightchild(pos))
+                        self.minHeapify(self.rightchild(pos))
+
+                elif self.Heap[self.leftchild(pos)][0] < self.Heap[self.rightchild(pos)][0]:
                     self.swap(pos, self.leftchild(pos))
                     self.minHeapify(self.leftchild(pos))
 
                 else:
                     self.swap(pos, self.rightchild(pos))
                     self.minHeapify(self.rightchild(pos))
+
+            elif (self.Heap[pos][0] == self.Heap[self.leftchild(pos)][0] or 
+                self.Heap[pos][0] == self.Heap[self.rightchild(pos)][0]):
+
+                if self.Heap[self.leftchild(pos)][0] == self.Heap[self.rightchild(pos)][0]:
+                    if self.Heap[self.leftchild(pos)][1] > self.Heap[self.rightchild(pos)][1] and self.Heap[self.leftchild(pos)][1] > self.Heap[pos][1]:
+                        self.swap(pos, self.leftchild(pos))
+                        self.minHeapify(self.leftchild(pos))
+
+                    elif self.Heap[self.rightchild(pos)][1] > self.Heap[self.rightchild(pos)][1] and self.Heap[self.rightchild(pos)][1] > self.Heap[pos][1]:
+                        self.swap(pos, self.rightchild(pos))
+                        self.minHeapify(self.rightchild(pos))
+
+                elif self.Heap[pos][0] == self.Heap[self.rightchild(pos)][0]:
+                    if self.Heap[self.rightchild(pos)][1] > self.Heap[pos][1]:
+                        self.swap(pos, self.rightchild(pos))
+                        self.minHeapify(self.rightchild(pos))
+                
+                else:
+                    if self.Heap[self.leftchild(pos)][1] > self.Heap[pos][1]:
+                        self.swap(pos, self.leftchild(pos))
+                        self.minHeapify(self.leftchild(pos))
 
     def isEmpty(self):
         if self.size == 0:
@@ -87,7 +123,7 @@ def A_star(maze, start: node, goal: node):
     open_list = Heap(1000)
 
     # heapq.heappush(open_list, (0, start))
-    open_list.push((h(start, goal), start))
+    open_list.push((h(start, goal), 0, start))
     
     closed_list = {}
     closed_list[start] = None
@@ -96,7 +132,7 @@ def A_star(maze, start: node, goal: node):
 
     while not open_list.isEmpty():
         # (priority, curr) = heapq.heappop(open_list)
-        (priority, curr) = open_list.pop()
+        (priority, _, curr) = open_list.pop()
 
         # display_maze(maze, curr, goal)
         #print(len(get_neighbors(maze, curr)))
@@ -114,7 +150,7 @@ def A_star(maze, start: node, goal: node):
                 cost_so_far[next] = new_g
                 priority = new_g + h(curr,goal)
                 # heapq.heappush(open_list, (priority, next))
-                open_list.push((priority, next))
+                open_list.push((priority, new_g, next))
                 closed_list[next] = curr
     end = curr
     path = []
@@ -148,21 +184,21 @@ def get_neighbors(maze, agent: node):
             neighbors.append(maze[agent.x][agent.y-1])
     return neighbors
 
-def generate_maze(rows: int, cols: int):
+def generate_maze(size):
     
     #generate a maze by randomly choose 20% of the grid to be obstacles using randint
     agent_maze = []
     maze = []
 
-    for r in range(rows):
+    for r in range(size):
         agent_maze.append([])
         maze.append([])
-        for c in range(cols):
+        for c in range(size):
             maze[-1].append(0)
             agent_maze[-1].append(0)
     
-    for i in range(rows):
-        for j in range(cols):
+    for i in range(size):
+        for j in range(size):
             agent_maze[i][j] = node(i,j)
             maze[i][j] = node(i,j)
             rand = randint(0,100)
@@ -171,14 +207,14 @@ def generate_maze(rows: int, cols: int):
             
     return maze, agent_maze
 
-def display_maze(maze, path, goal):
-    for r in maze:
-        for c in r:
-            if c in path:
+def display_maze(maze, size, path, goal):
+    for i in range(size):
+        for j in range(size):
+            if maze[i][j] in path:
                 print('#', end=' ')
-            elif c == goal:
+            elif maze[i][j] == goal:
                 print('@', end=' ')
-            elif c.obstacle:
+            elif maze[i][j].obstacle:
                 print('*', end=' ')
             else:
                 print('^', end=' ')
@@ -192,14 +228,21 @@ def display_maze(maze, path, goal):
 # if __name__=="__main__":
 #     main()
 
+
+
+size = 10
 orig_stdout = sys.stdout
 f = open('output.txt', 'w')
 sys.stdout = f
-maze,agent_maze = generate_maze(10,10)
+maze,agent_maze = generate_maze(size)
 
 #forward A* execution
 curr_start = agent_maze[0][0]
-goal = agent_maze[9][9]
+goal = agent_maze[size-1][size-1]
+
+for i in range(size):
+    for j in range(size):
+        agent_maze[i][j].h = abs(i - goal.x) + abs(j - goal.y)
 
 if maze[curr_start.x][curr_start.y].obstacle:
     sys.exit('Starting from an obstacle')
@@ -207,7 +250,7 @@ if maze[curr_start.x][curr_start.y].obstacle:
 path = [curr_start]
 final_path = []
 print('original maze:')
-display_maze(maze, [None], None)
+display_maze(maze, size, [None], None)
 print()
 print('forward A*: ')
 while True:
@@ -238,19 +281,19 @@ while True:
             agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
     path = A_star(agent_maze, curr_start, goal)
     print('current state:')
-    display_maze(agent_maze, path, goal)
+    display_maze(agent_maze, size, path, goal)
     print()
     if curr_start == goal:
         print('found!')
         break
 print('final path:')
 final_path = list(set(final_path))
-display_maze(agent_maze, final_path, goal)
+display_maze(agent_maze, size, final_path, goal)
 print('path length: ' + str(len(final_path)))
 
 #Backward A* execution
-_,agent_maze = generate_maze(10,10)
-curr_start = agent_maze[9][9]
+_,agent_maze = generate_maze(size)
+curr_start = agent_maze[size-1][size-1]
 goal = agent_maze[0][0]
 
 if maze[curr_start.x][curr_start.y].obstacle:
@@ -259,7 +302,7 @@ if maze[curr_start.x][curr_start.y].obstacle:
 path = [curr_start]
 final_path = []
 print('original maze:')
-display_maze(maze, [None], None)
+display_maze(maze, size, [None], None)
 print()
 print('backward A*: ')
 while True:
@@ -290,14 +333,14 @@ while True:
             agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
     path = A_star(agent_maze, curr_start, goal)
     print('current state:')
-    display_maze(agent_maze, path, goal)
+    display_maze(agent_maze, size, path, goal)
     print()
     if curr_start == goal:
         print('found!')
         break
 print('final path:')
 final_path = list(set(final_path))
-display_maze(agent_maze, final_path, goal)
+display_maze(agent_maze, size, final_path, goal)
 print('path length: ' + str(len(final_path)))
 
 sys.stdout = orig_stdout
