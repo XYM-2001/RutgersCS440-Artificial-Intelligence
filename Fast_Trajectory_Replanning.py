@@ -164,6 +164,52 @@ def A_star(maze, start: node, goal: node):
     path.append(start)
     return path
 
+def A_star_tie(maze, start: node, goal: node):
+    #return a path found by A* and the resulting node
+    
+    # open_list = []
+    open_list = Heap(1000)
+
+    # heapq.heappush(open_list, (0, start))
+    open_list.push((start.h, 0, start))
+    
+    closed_list = {}
+    closed_list[start] = None
+    cost_so_far = {}
+    cost_so_far[start] = 0
+
+    while not open_list.isEmpty():
+        # (priority, curr) = heapq.heappop(open_list)
+        (priority, _, curr) = open_list.pop()
+
+        # display_maze(maze, curr, goal)
+        #print(len(get_neighbors(maze, curr)))
+        if curr == goal:
+            #the goal is found
+            break
+        
+        # elif not get_neighbors(maze, curr): 
+        #     #run into obstacles
+        #     break
+
+        for next in get_neighbors(maze, curr):
+            new_g = cost_so_far[curr] + 1
+            if next not in cost_so_far or new_g < cost_so_far[next]:
+                cost_so_far[next] = new_g
+                priority = 203*(new_g + curr.h) - new_g
+                # heapq.heappush(open_list, (priority, next))
+                open_list.push((priority, new_g, next))
+                closed_list[next] = curr
+    path = []
+    curr = goal
+    if goal not in closed_list:
+        sys.exit("Path doesn't exist!")
+    while curr != start:
+        path.append(curr)
+        curr = closed_list[curr]
+    path.append(start)
+    return path
+
 def adaptive_A_star(maze, start: node, goal: node):
     #return a path found by A* and the resulting node
     
@@ -322,6 +368,64 @@ def main():
                 #add up block
                 agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
         path = A_star(agent_maze, curr_start, goal)
+        print('current state:')
+        display_maze(agent_maze, size, path, goal)
+        print()
+        if curr_start == goal:
+            print('found!')
+            break
+    print('final path:')
+    final_path = list(set(final_path))
+    display_maze(agent_maze, size, final_path, goal)
+    print('path length: ' + str(len(final_path)))
+    print('Execution time: %s' % (time.time() - start_time))
+
+
+    # break tie
+    curr_start = agent_maze[0][0]
+    goal = agent_maze[size-1][size-1]
+
+    if maze[curr_start.x][curr_start.y].obstacle:
+        sys.exit('Starting from an obstacle')
+
+    for i in range(size):
+        for j in range(size):
+            agent_maze[i][j].h = abs(i - goal.x) + abs(j - goal.y)
+
+    path = [curr_start]
+    final_path = []
+    start_time = time.time()
+    print('original maze:')
+    display_maze(maze, size, [None], None)
+    print()
+    print('break tie: ')
+    while True:
+        while path:
+
+            temp = path.pop(-1)
+            if maze[temp.x][temp.y].obstacle:
+                if temp == goal:
+                    curr_start = temp
+                    break
+                else:
+                    agent_maze[temp.x][temp.y].obstacle = maze[temp.x][temp.y].obstacle
+                    break
+
+            curr_start = temp
+            final_path.append(curr_start)
+            if curr_start.x < len(agent_maze)-1:
+                #add right block
+                agent_maze[curr_start.x+1][curr_start.y].obstacle = maze[curr_start.x+1][curr_start.y].obstacle
+            if curr_start.x > 0:
+                #add left block
+                agent_maze[curr_start.x-1][curr_start.y].obstacle = maze[curr_start.x-1][curr_start.y].obstacle
+            if curr_start.y < len(agent_maze[0])-1:
+                #add down block
+                agent_maze[curr_start.x][curr_start.y+1].obstace = maze[curr_start.x][curr_start.y+1].obstacle
+            if curr_start.y > 0: 
+                #add up block
+                agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
+        path = A_star_tie(agent_maze, curr_start, goal)
         print('current state:')
         display_maze(agent_maze, size, path, goal)
         print()
