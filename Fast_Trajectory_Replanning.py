@@ -242,7 +242,9 @@ def adaptive_A_star(maze, start: node, goal: node):
             new_g = cost_so_far[curr] + 1
             if next not in cost_so_far or new_g < cost_so_far[next]:
                 cost_so_far[next] = new_g
-                priority = new_g + curr.h
+                priority = 203*(new_g + curr.h) - new_g
+                # priority = new_g + curr.h
+
                 # heapq.heappush(open_list, (priority, next))
                 open_list.push((priority, new_g, next))
                 closed_list[next] = curr
@@ -340,7 +342,6 @@ def main():
     print('original maze:')
     display_maze(maze, size, [None], None)
     print()
-    print('forward A*: ')
     while True:
         while path:
 
@@ -377,6 +378,7 @@ def main():
     print('final path:')
     final_path = list(set(final_path))
     display_maze(agent_maze, size, final_path, goal)
+    print('excuted forward A*: ')
     print('path length: ' + str(len(final_path)))
     print('Execution time: %s' % (time.time() - start_time))
 
@@ -398,7 +400,6 @@ def main():
     print('original maze:')
     display_maze(maze, size, [None], None)
     print()
-    print('break tie: ')
     while True:
         while path:
 
@@ -435,6 +436,7 @@ def main():
     print('final path:')
     final_path = list(set(final_path))
     display_maze(agent_maze, size, final_path, goal)
+    print('executed forward A* break tie: ')
     print('path length: ' + str(len(final_path)))
     print('Execution time: %s' % (time.time() - start_time))
 
@@ -452,10 +454,10 @@ def main():
 
     path = [curr_start]
     final_path = []
+    start_time = time.time()
     print('original maze:')
     display_maze(maze, size, [None], None)
     print()
-    print('backward A*: ')
     while True:
         while path:
 
@@ -482,7 +484,7 @@ def main():
             if curr_start.y > 0: 
                 #add up block
                 agent_maze[curr_start.x][curr_start.y-1].obstacle = maze[curr_start.x][curr_start.y-1].obstacle
-        path = A_star(agent_maze, curr_start, goal)
+        path = A_star_tie(agent_maze, curr_start, goal)
         print('current state:')
         display_maze(agent_maze, size, path, goal)
         print()
@@ -492,7 +494,9 @@ def main():
     print('final path:')
     final_path = list(set(final_path))
     display_maze(agent_maze, size, final_path, goal)
+    print('executed backward A* break tie')
     print('path length: ' + str(len(final_path)))
+    print('Execution time: %s' % (time.time() - start_time))
 
     #adaptive A* execution
     _,agent_maze = generate_maze(size)
@@ -512,7 +516,6 @@ def main():
     print('original maze:')
     display_maze(maze, size, [None], None)
     print()
-    print('adaptive A*: ')
     while True:
         while path:
 
@@ -553,6 +556,7 @@ def main():
     print('final path:')
     final_path = list(set(final_path))
     display_maze(agent_maze, size, final_path, goal)
+    print('executed adaptive A*: ')
     print('path length: ' + str(len(final_path)))
     print('Execution time: %s' % (time.time() - start_time))
 
