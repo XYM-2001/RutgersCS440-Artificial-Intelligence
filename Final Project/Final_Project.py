@@ -7,49 +7,15 @@ def display_image(image):
 
 class Perceptron:
     def __init__(self, num_features):
-        # Initialize the weights and bias to small random values
-        self.weights = np.random.randn(num_features)
-        self.bias = np.random.randn()
+        self.weights = np.zeros(num_features)
 
     def predict(self, features):
-        # Calculate the weighted sum of the features
-        weighted_sum = np.dot(features, self.weights) + self.bias
+        weighted_sum = np.dot(features, self.weights)
 
-        # Apply the step function to the weighted sum
         if weighted_sum >= 0:
             return 1
         else:
             return 0
-        
-# class Perceptron:
-#     def __init__(self, lr=0.1, epochs=100):
-#         self.lr = lr
-#         self.epochs = epochs
-
-#     def fit(self, X, y):
-#         # Add a bias term to the input data
-#         X = np.hstack((X, np.ones((X.shape[0], 1))))
-
-#         # Initialize weights to zeros
-#         self.weights = np.zeros(X.shape[1])
-
-#         # Train the perceptron
-#         for epoch in range(self.epochs):
-#             for i in range(X.shape[0]):
-#                 if y[i] * np.dot(self.weights, X[i]) <= 0:
-#                     self.weights += self.lr * y[i] * X[i]
-
-#     def predict(self, X):
-#         # Add a bias term to the input data
-#         X = np.hstack((X, np.ones((X.shape[0], 1))))
-
-#         # Compute the dot product of the input data and the weights
-#         dot_product = np.dot(X, self.weights)
-
-#         # Compute the predicted class labels as 0 or 1
-#         y_pred = np.where(dot_product > 0, 1, 0)
-
-#         return y_pred
     
 def load_imagelabel(filename):
     __location__ = os.path.dirname(__file__)
@@ -97,21 +63,28 @@ def train_model(training_set, training_label, perceptron):
     for i in range(len(training_set)):
         features = convert_Integer(training_set[i]).flatten()/255.0
         prediction = perceptron.predict(features)
-        error = np.abs(training_label[i] - prediction)
-        perceptron.weights += error*training_set[i]
-        perceptron.bias += error
+        
+    print(perceptron.weights)
     return perceptron
 
 def main():
     labels = load_imagelabel('traininglabels')
+    labels = [int(i) for i in labels]
     images = load_image('trainingimages', len(labels))
+    training_set = images[0:500]
+    training_labels = labels[0:500]
+    testing_set = images[500:600]
+    testing_labels = labels[500:600]
     perceptron = Perceptron(num_features=28*28)
-
-    converted = convert_Integer(images[1])
-    display_image(converted)
-    features = converted.flatten() / 255.0
-    perceptron = Perceptron(num_features=len(features))
-    
+    print(perceptron.weights)
+    perceptron = train_model(training_set, training_labels, perceptron)
+    false = 0
+    for i in range(len(testing_set)):
+        features = convert_Integer(testing_set[i]).flatten()/255.0
+        prediction = perceptron.predict(features)
+        if prediction != testing_labels[i]:
+            false += 1
+    print(false/len(testing_set))
 
 if __name__=="__main__":
     main()
