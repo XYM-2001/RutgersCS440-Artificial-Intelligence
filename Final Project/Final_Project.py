@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import sys
+
 
 def display_image(image):
     for i in image:
@@ -16,7 +16,7 @@ class Perceptron:
 
         return weighted_sum
     
-def load_imagelabel(filename):
+def load_label(filename):
     __location__ = os.path.dirname(__file__)
     f = open(os.path.join(__location__, 'data\\' + filename))
     temp = f.readlines()
@@ -83,7 +83,7 @@ def train_face_model(training_set, training_label, perceptron):
 
 def main():
 # Perceptron for digit data
-    # traininglabels = load_imagelabel('digitdata\\traininglabels')
+    # traininglabels = load_label('digitdata\\traininglabels')
     # traininglabels = [int(i) for i in traininglabels]
     # trainingimages = load_image('digitdata\\trainingimages', len(traininglabels), 28, 28)
     # testlabels = load_imagelabel('digitdata\\testlabels')
@@ -105,17 +105,22 @@ def main():
     # print('precision for Perceptron on testing digits: ', trues/len(testlabels))
 
 #Perceptron for face data
-    __location__ = os.path.dirname(__file__)
-    f = open(os.path.join(__location__, 'data\\facedata\\facedatatrain'))   
-    f.close()
-    # traininglabels = load_imagelabel('facedata\\facedatatrainlabels')
-    # traininglabels = [int(i) for i in traininglabels]
-    # trainingset = load_image('facedata\\facedatatrain', len(traininglabels), 60, 74)
-    # testlabels = load_imagelabel('facedata\\facedatatestlabels')
-    # testlabels = [int(i) for i in testlabels]
-    # testset = load_image('facedata\\facedatatest', len(testlabels), 60, 74)
-    # perceptron = Perceptron(60*74)
-    # perceptron = train_face_model(trainingset, traininglabels, perceptron)
+    traininglabels = load_label('facedata\\facedatatrainlabels')
+    traininglabels = [int(i) for i in traininglabels]
+    trainingset = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
+    testlabels = load_label('facedata\\facedatatestlabels')
+    testlabels = [int(i) for i in testlabels]
+    testset = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
+    perceptron = Perceptron(60*70)
+    perceptron = train_face_model(trainingset, traininglabels, perceptron)
+    trues = 0
+    for i in range(len(testset)):
+        features = convert_Integer(testset[i]).flatten()
+        prediction = perceptron.predict(features)
+        if (prediction >= 0 and testlabels[i] == 1) or (prediction < 0 and testlabels[i] == 0):
+            trues += 1
+    print('precision for Perceptron on testing faces: ', trues/len(testlabels))
+    
 
 if __name__=="__main__":
     main()
