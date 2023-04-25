@@ -84,13 +84,30 @@ def main():
     for i in range(10):
         perceptrons.append(Perceptron(28*28, i))
     perceptrons = train_model(trainingimages, traininglabels, perceptrons)
+    trues = 0
+    nums = 0
     for i in range(len(testimages)):
-        if testlabels[i] == 0:
+        if testlabels[i] == 1:
             nums += 1
             features = convert_Integer(testimages[i]).flatten()
-            prediction = perceptrons[0].predict(features)
+            prediction = perceptrons[1].predict(features)
             if prediction >= 0:
                 trues += 1
+    print(trues)
+    print(nums)
+    # trues = 0
+    # for i in range(len(testimages)):
+    #     features = convert_Integer(testimages[i]).flatten()
+    #     for j in range(10):
+    #         predictions = []
+    #         predictions.append(perceptrons[j].predict(features))
+    #     predictions = [max(predictions) if i < 0 else i for i in predictions]
+    #     prediction = predictions.index(min(predictions))
+    #     print([testlabels[i],prediction])
+    #     if prediction == testlabels[i]:
+    #         trues += 1
+    # print(trues)
+    # print(len(testlabels))
 
 
 if __name__=="__main__":
