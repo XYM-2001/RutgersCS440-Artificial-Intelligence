@@ -60,17 +60,16 @@ def convert_Integer(image):
 
 def train_model(training_set, training_label, perceptrons):
     for i in range(len(training_set)):
+        predictions = []
         for j in range(10):
-            perceptron = perceptrons[j]
             features = convert_Integer(training_set[i]).flatten()
-            prediction = perceptron.predict(features)
-            if prediction < 0 and training_label[i] == perceptron.digit:
-                perceptron.weights = perceptron.weights + features
-                perceptron.w0 += 1
-            elif prediction >= 0 and  training_label[i] != perceptron.digit:
-                perceptron.weights = perceptron.weights - features
-                perceptron.w0 -= 1
-            perceptrons[j] = perceptron
+            predictions.append(perceptrons[j].predict(features))
+        prediction = predictions.index(max(predictions))
+        if prediction != training_label[i]:
+            perceptrons[prediction].weights = perceptrons[prediction].weights - features
+            perceptrons[prediction].w0 -= 1
+            perceptrons[training_label[i]].weights = perceptrons[training_label[i]].weights + features
+            perceptrons[training_label[i]].w0 += 1
     return perceptrons
 
 def main():
@@ -85,29 +84,16 @@ def main():
         perceptrons.append(Perceptron(28*28, i))
     perceptrons = train_model(trainingimages, traininglabels, perceptrons)
     trues = 0
-    nums = 0
     for i in range(len(testimages)):
-        if testlabels[i] == 1:
-            nums += 1
-            features = convert_Integer(testimages[i]).flatten()
-            prediction = perceptrons[1].predict(features)
-            if prediction >= 0:
-                trues += 1
-    print(trues)
-    print(nums)
-    # trues = 0
-    # for i in range(len(testimages)):
-    #     features = convert_Integer(testimages[i]).flatten()
-    #     for j in range(10):
-    #         predictions = []
-    #         predictions.append(perceptrons[j].predict(features))
-    #     predictions = [max(predictions) if i < 0 else i for i in predictions]
-    #     prediction = predictions.index(min(predictions))
-    #     print([testlabels[i],prediction])
-    #     if prediction == testlabels[i]:
-    #         trues += 1
-    # print(trues)
-    # print(len(testlabels))
+        features = convert_Integer(testimages[i]).flatten()
+        predictions = []
+        for j in range(10):
+            predictions.append(perceptrons[j].predict(features))
+        prediction = predictions.index(max(predictions))
+        if prediction == testlabels[i]:
+            trues += 1
+    print('precision for Perceptron on testing digits: ', trues/len(testlabels))
+    traininglabels = load_imagelabel('')
 
 
 if __name__=="__main__":
