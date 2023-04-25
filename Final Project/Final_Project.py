@@ -60,8 +60,8 @@ def convert_Integer(image):
 
 def train_model(training_set, training_label, perceptrons):
     for i in range(len(training_set)):
-        for i in range(10):
-            perceptron = perceptrons[i]
+        for j in range(10):
+            perceptron = perceptrons[j]
             features = convert_Integer(training_set[i]).flatten()
             prediction = perceptron.predict(features)
             if prediction < 0 and training_label[i] == perceptron.digit:
@@ -70,7 +70,7 @@ def train_model(training_set, training_label, perceptrons):
             elif prediction >= 0 and  training_label[i] != perceptron.digit:
                 perceptron.weights = perceptron.weights - features
                 perceptron.w0 -= 1
-            perceptrons[i] = perceptron
+            perceptrons[j] = perceptron
     return perceptrons
 
 def main():
@@ -84,8 +84,6 @@ def main():
     for i in range(10):
         perceptrons.append(Perceptron(28*28, i))
     perceptrons = train_model(trainingimages, traininglabels, perceptrons)
-    trues = 0
-    nums = 0
     for i in range(len(testimages)):
         if testlabels[i] == 0:
             nums += 1
@@ -93,8 +91,6 @@ def main():
             prediction = perceptrons[0].predict(features)
             if prediction >= 0:
                 trues += 1
-    print(trues)
-    print(nums)
 
 
 if __name__=="__main__":
