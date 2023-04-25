@@ -18,28 +18,25 @@ class Perceptron:
     
 def load_imagelabel(filename):
     __location__ = os.path.dirname(__file__)
-    f = open(os.path.join(__location__, 'data\\digitdata\\' + filename))
+    f = open(os.path.join(__location__, 'data\\' + filename))
     temp = f.readlines()
     f.close()
     return temp
 
-def load_image(filename, number):
+def load_image(filename, number, x, y):
     __location__ = os.path.dirname(__file__)
-    f = open(os.path.join(__location__, 'data\\digitdata\\' + filename))
+    f = open(os.path.join(__location__, 'data\\' + filename))
     temp = f.readlines()
     temp.reverse()
     items = []
     for i in range(number):
         data = []
-        for j in range(28):
-            data.append(list(temp.pop())[0:28])
+        for j in range(y):
+            data.append(list(temp.pop())[0:x])
             if not temp:
                 print('Reached the end of file.')
                 items.append(data)
                 return items
-        if len(data[0]) < 27:
-            print('Truncating at %d examples (maximum)' % i)
-            break
         items.append(data)
     f.close()
     return items
@@ -73,28 +70,34 @@ def train_model(training_set, training_label, perceptrons):
     return perceptrons
 
 def main():
-    traininglabels = load_imagelabel('traininglabels')
-    traininglabels = [int(i) for i in traininglabels]
-    trainingimages = load_image('trainingimages', len(traininglabels))
-    testlabels = load_imagelabel('testlabels')
-    testlabels = [int(i) for i in testlabels]
-    testimages = load_image('testimages', len(testlabels))
-    perceptrons = []
-    for i in range(10):
-        perceptrons.append(Perceptron(28*28, i))
-    perceptrons = train_model(trainingimages, traininglabels, perceptrons)
-    trues = 0
-    for i in range(len(testimages)):
-        features = convert_Integer(testimages[i]).flatten()
-        predictions = []
-        for j in range(10):
-            predictions.append(perceptrons[j].predict(features))
-        prediction = predictions.index(max(predictions))
-        if prediction == testlabels[i]:
-            trues += 1
-    print('precision for Perceptron on testing digits: ', trues/len(testlabels))
-    traininglabels = load_imagelabel('')
+# Perceptron for digit data
+    # traininglabels = load_imagelabel('digitdata\\traininglabels')
+    # traininglabels = [int(i) for i in traininglabels]
+    # trainingimages = load_image('digitdata\\trainingimages', len(traininglabels), 28, 28)
+    # testlabels = load_imagelabel('digitdata\\testlabels')
+    # testlabels = [int(i) for i in testlabels]
+    # testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
+    # perceptrons = []
+    # for i in range(10):
+    #     perceptrons.append(Perceptron(28*28, i))
+    # perceptrons = train_model(trainingimages, traininglabels, perceptrons)
+    # trues = 0
+    # for i in range(len(testimages)):
+    #     features = convert_Integer(testimages[i]).flatten()
+    #     predictions = []
+    #     for j in range(10):
+    #         predictions.append(perceptrons[j].predict(features))
+    #     prediction = predictions.index(max(predictions))
+    #     if prediction == testlabels[i]:
+    #         trues += 1
+    # print('precision for Perceptron on testing digits: ', trues/len(testlabels))
 
+#Perceptron for face data
+    traininglabels = load_imagelabel('facedata\\facedatatrainlabels')
+    traininglabels = [int(i) for i in traininglabels]
+    trainingimages = load_image('facedata\\facedatatrain', len(traininglabels), 60, 74)
+    display_image(trainingimages[0])
+    display_image(trainingimages[-1])
 
 if __name__=="__main__":
     main()
