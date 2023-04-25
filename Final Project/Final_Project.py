@@ -1,15 +1,15 @@
 import os
 import numpy as np
+import sys
 
 def display_image(image):
     for i in image:
         print(i)
 
 class Perceptron:
-    def __init__(self, num_features, digit):
+    def __init__(self, num_features):
         self.weights = np.zeros(num_features)
         self.w0 = 0
-        self.digit = digit
 
     def predict(self, features):
         weighted_sum = self.w0 + np.dot(features, self.weights)
@@ -55,7 +55,7 @@ def convert_Integer(image):
         converted.append(converted_row)
     return np.array(converted)
 
-def train_model(training_set, training_label, perceptrons):
+def train_digit_model(training_set, training_label, perceptrons):
     for i in range(len(training_set)):
         predictions = []
         for j in range(10):
@@ -69,6 +69,18 @@ def train_model(training_set, training_label, perceptrons):
             perceptrons[training_label[i]].w0 += 1
     return perceptrons
 
+def train_face_model(training_set, training_label, perceptron):
+    for i in range(len(training_set)):
+        features = convert_Integer(training_set[i]).flatten()
+        prediction = perceptron.predict(features)
+        if prediction < 0 and training_label[i] == 1:
+            perceptron.weights = perceptron.weights + features
+            perceptron.w0 += 1
+        elif prediction >= 0 and training_label[i] == 0: 
+            perceptron.weights = perceptron.weights - features
+            perceptron.w0 -= 1
+    return perceptron
+
 def main():
 # Perceptron for digit data
     # traininglabels = load_imagelabel('digitdata\\traininglabels')
@@ -79,8 +91,8 @@ def main():
     # testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
     # perceptrons = []
     # for i in range(10):
-    #     perceptrons.append(Perceptron(28*28, i))
-    # perceptrons = train_model(trainingimages, traininglabels, perceptrons)
+    #     perceptrons.append(Perceptron(28*28))
+    # perceptrons = train_digit_model(trainingimages, traininglabels, perceptrons)
     # trues = 0
     # for i in range(len(testimages)):
     #     features = convert_Integer(testimages[i]).flatten()
@@ -93,11 +105,17 @@ def main():
     # print('precision for Perceptron on testing digits: ', trues/len(testlabels))
 
 #Perceptron for face data
-    traininglabels = load_imagelabel('facedata\\facedatatrainlabels')
-    traininglabels = [int(i) for i in traininglabels]
-    trainingimages = load_image('facedata\\facedatatrain', len(traininglabels), 60, 74)
-    display_image(trainingimages[0])
-    display_image(trainingimages[-1])
+    __location__ = os.path.dirname(__file__)
+    f = open(os.path.join(__location__, 'data\\facedata\\facedatatrain'))   
+    f.close()
+    # traininglabels = load_imagelabel('facedata\\facedatatrainlabels')
+    # traininglabels = [int(i) for i in traininglabels]
+    # trainingset = load_image('facedata\\facedatatrain', len(traininglabels), 60, 74)
+    # testlabels = load_imagelabel('facedata\\facedatatestlabels')
+    # testlabels = [int(i) for i in testlabels]
+    # testset = load_image('facedata\\facedatatest', len(testlabels), 60, 74)
+    # perceptron = Perceptron(60*74)
+    # perceptron = train_face_model(trainingset, traininglabels, perceptron)
 
 if __name__=="__main__":
     main()
