@@ -6,16 +6,15 @@ def display_image(image):
         print(i)
 
 class Perceptron:
-    def __init__(self, num_features):
+    def __init__(self, num_features, digit):
         self.weights = np.zeros(num_features)
+        self.w0 = 0
+        self.digit = digit
 
     def predict(self, features):
-        weighted_sum = np.dot(features, self.weights)
+        weighted_sum = self.w0 + np.dot(features, self.weights)
 
-        if weighted_sum >= 0:
-            return 1
-        else:
-            return 0
+        return weighted_sum
     
 def load_imagelabel(filename):
     __location__ = os.path.dirname(__file__)
@@ -59,32 +58,44 @@ def convert_Integer(image):
         converted.append(converted_row)
     return np.array(converted)
 
-def train_model(training_set, training_label, perceptron):
+def train_model(training_set, training_label, perceptrons):
     for i in range(len(training_set)):
-        features = convert_Integer(training_set[i]).flatten()/255.0
-        prediction = perceptron.predict(features)
-        
-    print(perceptron.weights)
-    return perceptron
+        for i in range(10):
+            perceptron = perceptrons[i]
+            features = convert_Integer(training_set[i]).flatten()
+            prediction = perceptron.predict(features)
+            if prediction < 0 and training_label[i] == perceptron.digit:
+                perceptron.weights = perceptron.weights + features
+                perceptron.w0 += 1
+            elif prediction >= 0 and  training_label[i] != perceptron.digit:
+                perceptron.weights = perceptron.weights - features
+                perceptron.w0 -= 1
+            perceptrons[i] = perceptron
+    return perceptrons
 
 def main():
-    labels = load_imagelabel('traininglabels')
-    labels = [int(i) for i in labels]
-    images = load_image('trainingimages', len(labels))
-    training_set = images[0:500]
-    training_labels = labels[0:500]
-    testing_set = images[500:600]
-    testing_labels = labels[500:600]
-    perceptron = Perceptron(num_features=28*28)
-    print(perceptron.weights)
-    perceptron = train_model(training_set, training_labels, perceptron)
-    false = 0
-    for i in range(len(testing_set)):
-        features = convert_Integer(testing_set[i]).flatten()/255.0
-        prediction = perceptron.predict(features)
-        if prediction != testing_labels[i]:
-            false += 1
-    print(false/len(testing_set))
+    traininglabels = load_imagelabel('traininglabels')
+    traininglabels = [int(i) for i in traininglabels]
+    trainingimages = load_image('trainingimages', len(traininglabels))
+    testlabels = load_imagelabel('testlabels')
+    testlabels = [int(i) for i in testlabels]
+    testimages = load_image('testimages', len(testlabels))
+    perceptrons = []
+    for i in range(10):
+        perceptrons.append(Perceptron(28*28, i))
+    perceptrons = train_model(trainingimages, traininglabels, perceptrons)
+    trues = 0
+    nums = 0
+    for i in range(len(testimages)):
+        if testlabels[i] == 0:
+            nums += 1
+            features = convert_Integer(testimages[i]).flatten()
+            prediction = perceptrons[0].predict(features)
+            if prediction >= 0:
+                trues += 1
+    print(trues)
+    print(nums)
+
 
 if __name__=="__main__":
     main()
