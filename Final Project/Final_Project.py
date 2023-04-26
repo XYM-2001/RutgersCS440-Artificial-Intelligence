@@ -1,11 +1,6 @@
 import os
 import numpy as np
-import torch
-import torchvision
-import matplotlib.pyplot as plt
-from time import time
-from torchvision import datasets, transforms
-from torch import nn, optim
+
 
 
 def display_image(image):
@@ -21,6 +16,35 @@ class Perceptron:
         weighted_sum = self.w0 + np.dot(features, self.weights)
 
         return weighted_sum
+
+class NaiveBayes:
+    def fit(self, X, y):
+        self.classes = np.unique(y)
+        self.mean = np.zeros((len(self.classes), X.shape[1]))
+        self.var = np.zeros((len(self.classes), X.shape[1]))
+        self.prior = np.zeros(len(self.classes))
+
+        # Calculate the mean, variance, and prior probability for each class
+        for i, c in enumerate(self.classes):
+            X_c = X[c == y]
+            self.mean[i, :] = np.mean(X_c, axis=0)
+            self.var[i, :] = np.var(X_c, axis=0)
+            self.prior[i] = X_c.shape[0] / X.shape[0]
+
+    def predict(self, X):
+        # Calculate the likelihood of each feature given each class
+        likelihood = np.zeros((len(self.classes), X.shape[1]))
+        for i, c in enumerate(self.classes):
+            likelihood[i, :] = -0.5 * np.log(2 * np.pi * self.var[i, :])
+            likelihood[i, :] -= 0.5 * ((X - self.mean[i, :]) ** 2) / self.var[i, :]
+
+        # Calculate the posterior probability of each class
+        posterior = np.zeros(len(self.classes))
+        for i, c in enumerate(self.classes):
+            posterior[i] = np.sum(likelihood[i, :]) + np.log(self.prior[i])
+
+        # Return the class with the highest posterior probability
+        return self.classes[np.argmax(posterior)]
     
 def load_label(filename):
     __location__ = os.path.dirname(__file__)
@@ -92,7 +116,7 @@ def main():
     # traininglabels = load_label('digitdata\\traininglabels')
     # traininglabels = [int(i) for i in traininglabels]
     # trainingimages = load_image('digitdata\\trainingimages', len(traininglabels), 28, 28)
-    # testlabels = load_imagelabel('digitdata\\testlabels')
+    # testlabels = load_label('digitdata\\testlabels')
     # testlabels = [int(i) for i in testlabels]
     # testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
     # perceptrons = []
@@ -126,15 +150,20 @@ def main():
     #     if (prediction >= 0 and testlabels[i] == 1) or (prediction < 0 and testlabels[i] == 0):
     #         trues += 1
     # print('precision for Perceptron on testing faces: ', trues/len(testlabels))
-
-    transform = transforms.Compose([
-        transforms.Resize((28, 28)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,))
-    ])
-    __location__ = os.path.dirname(__file__)
-    train_data = datasets.ImageFolder(os.path.join(__location__, 'data\\digitdata\\trainingimages'), transform=transform)
-    test_data = datasets.ImageFolder(os.path.join(__location__, 'data\\digitdata\\testimages'), transform=transform)
+#Naive Bayes for digit data
+    traininglabels = load_label('digitdata\\traininglabels')
+    traininglabels = [int(i) for i in traininglabels]
+    trainingimages = load_image('digitdata\\trainingimages', len(traininglabels), 28, 28)
+    testlabels = load_label('digitdata\\testlabels')
+    testlabels = [int(i) for i in testlabels]
+    testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
+    classifier = NaiveBayes()
+    classifier.fit(trainingimages, traininglabels)
+    predictions = np.zeros(len(testimages))
+    for i in range(len(predictions)):
+        predictions[i] = classifier.predict(testimages[i, :])
+    accuracy = np.mean(predictions == testlabels)
+    print(accuracy)
 
 if __name__=="__main__":
     main()
