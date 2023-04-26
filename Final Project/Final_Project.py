@@ -1,5 +1,11 @@
 import os
 import numpy as np
+import torch
+import torchvision
+import matplotlib.pyplot as plt
+from time import time
+from torchvision import datasets, transforms
+from torch import nn, optim
 
 
 def display_image(image):
@@ -105,22 +111,30 @@ def main():
     # print('precision for Perceptron on testing digits: ', trues/len(testlabels))
 
 #Perceptron for face data
-    traininglabels = load_label('facedata\\facedatatrainlabels')
-    traininglabels = [int(i) for i in traininglabels]
-    trainingset = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
-    testlabels = load_label('facedata\\facedatatestlabels')
-    testlabels = [int(i) for i in testlabels]
-    testset = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
-    perceptron = Perceptron(60*70)
-    perceptron = train_face_model(trainingset, traininglabels, perceptron)
-    trues = 0
-    for i in range(len(testset)):
-        features = convert_Integer(testset[i]).flatten()
-        prediction = perceptron.predict(features)
-        if (prediction >= 0 and testlabels[i] == 1) or (prediction < 0 and testlabels[i] == 0):
-            trues += 1
-    print('precision for Perceptron on testing faces: ', trues/len(testlabels))
-    
+    # traininglabels = load_label('facedata\\facedatatrainlabels')
+    # traininglabels = [int(i) for i in traininglabels]
+    # trainingset = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
+    # testlabels = load_label('facedata\\facedatatestlabels')
+    # testlabels = [int(i) for i in testlabels]
+    # testset = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
+    # perceptron = Perceptron(60*70)
+    # perceptron = train_face_model(trainingset, traininglabels, perceptron)
+    # trues = 0
+    # for i in range(len(testset)):
+    #     features = convert_Integer(testset[i]).flatten()
+    #     prediction = perceptron.predict(features)
+    #     if (prediction >= 0 and testlabels[i] == 1) or (prediction < 0 and testlabels[i] == 0):
+    #         trues += 1
+    # print('precision for Perceptron on testing faces: ', trues/len(testlabels))
+
+    transform = transforms.Compose([
+        transforms.Resize((28, 28)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))
+    ])
+    __location__ = os.path.dirname(__file__)
+    train_data = datasets.ImageFolder(os.path.join(__location__, 'data\\digitdata\\trainingimages'), transform=transform)
+    test_data = datasets.ImageFolder(os.path.join(__location__, 'data\\digitdata\\testimages'), transform=transform)
 
 if __name__=="__main__":
     main()
