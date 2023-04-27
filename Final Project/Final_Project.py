@@ -7,6 +7,12 @@ def display_image(image):
     for i in image:
         print(i)
 
+def digit_split(training_set, training_labels):
+    image_classes = [[] for _ in range(10)]
+    for i in range(len(training_labels)):
+        image_classes[training_labels[i]].append(training_set[i])
+    return image_classes
+
 class Perceptron:
     def __init__(self, num_features):
         self.weights = np.zeros(num_features)
@@ -18,34 +24,16 @@ class Perceptron:
         return weighted_sum
 
 class NaiveBayes:
-    def fit(self, X, y):
-        self.classes = np.unique(y)
-        self.mean = np.zeros((len(self.classes), X.shape[1]))
-        self.var = np.zeros((len(self.classes), X.shape[1]))
-        self.prior = np.zeros(len(self.classes))
+    def __init__(self, num_features, prior):
+        self.p = np.array([0.000001*num_features])
+        self.prior = prior
 
-        # Calculate the mean, variance, and prior probability for each class
-        for i, c in enumerate(self.classes):
-            X_c = X[c == y]
-            self.mean[i, :] = np.mean(X_c, axis=0)
-            self.var[i, :] = np.var(X_c, axis=0)
-            self.prior[i] = X_c.shape[0] / X.shape[0]
+    def fit(self, X):
+        
 
     def predict(self, X):
-        # Calculate the likelihood of each feature given each class
-        likelihood = np.zeros((len(self.classes), X.shape[1]))
-        for i, c in enumerate(self.classes):
-            likelihood[i, :] = -0.5 * np.log(2 * np.pi * self.var[i, :])
-            likelihood[i, :] -= 0.5 * ((X - self.mean[i, :]) ** 2) / self.var[i, :]
+        return 0
 
-        # Calculate the posterior probability of each class
-        posterior = np.zeros(len(self.classes))
-        for i, c in enumerate(self.classes):
-            posterior[i] = np.sum(likelihood[i, :]) + np.log(self.prior[i])
-
-        # Return the class with the highest posterior probability
-        return self.classes[np.argmax(posterior)]
-    
 def load_label(filename):
     __location__ = os.path.dirname(__file__)
     f = open(os.path.join(__location__, 'data\\' + filename))
@@ -111,6 +99,7 @@ def train_face_model(training_set, training_label, perceptron):
             perceptron.w0 -= 1
     return perceptron
 
+
 def main():
 # Perceptron for digit data
     # traininglabels = load_label('digitdata\\traininglabels')
@@ -157,13 +146,13 @@ def main():
     testlabels = load_label('digitdata\\testlabels')
     testlabels = [int(i) for i in testlabels]
     testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
-    classifier = NaiveBayes()
-    classifier.fit(trainingimages, traininglabels)
-    predictions = np.zeros(len(testimages))
-    for i in range(len(predictions)):
-        predictions[i] = classifier.predict(testimages[i, :])
-    accuracy = np.mean(predictions == testlabels)
-    print(accuracy)
+    trainingclasses = digit_split(trainingimages, traininglabels)
+    classifier = []
+    for i in range(10):
+        classifier.append(NaiveBayes(28*28,len(trainingclasses[i])/len(trainingimages)))
+    for i in range(10):
+        classifier[i].fit(trainingclasses[i])
+
 
 if __name__=="__main__":
     main()

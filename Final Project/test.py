@@ -1,2 +1,1 @@
-import numpy as np
-print(np.random.rand())
+print([[] for _ in range(10)])
