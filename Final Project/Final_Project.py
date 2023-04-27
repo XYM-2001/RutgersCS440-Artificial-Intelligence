@@ -10,7 +10,7 @@ def display_image(image):
 def digit_split(training_set, training_labels):
     image_classes = [[] for _ in range(10)]
     for i in range(len(training_labels)):
-        image_classes[training_labels[i]].append(training_set[i])
+        image_classes[training_labels[i]].append(convert_Integer(training_set[i]).flatten())
     return image_classes
 
 class Perceptron:
@@ -25,14 +25,18 @@ class Perceptron:
 
 class NaiveBayes:
     def __init__(self, num_features, prior):
-        self.p = np.array([0.000001*num_features])
+        self.p = np.array([0.000001]*num_features)
         self.prior = prior
 
     def fit(self, X):
-        
+        for image in X:
+            for j in range(len(self.p)):
+                self.p[j] += image[j]
+        self.p = self.p/(2*len(X))
 
     def predict(self, X):
-        return 0
+        return np.log(np.dot(self.p,X)*self.prior)
+        
 
 def load_label(filename):
     __location__ = os.path.dirname(__file__)
@@ -121,7 +125,7 @@ def main():
     #     prediction = predictions.index(max(predictions))
     #     if prediction == testlabels[i]:
     #         trues += 1
-    # print('precision for Perceptron on testing digits: ', trues/len(testlabels))
+    # print('accuracy for Perceptron on testing digits: ', trues/len(testlabels))
 
 #Perceptron for face data
     # traininglabels = load_label('facedata\\facedatatrainlabels')
@@ -138,7 +142,7 @@ def main():
     #     prediction = perceptron.predict(features)
     #     if (prediction >= 0 and testlabels[i] == 1) or (prediction < 0 and testlabels[i] == 0):
     #         trues += 1
-    # print('precision for Perceptron on testing faces: ', trues/len(testlabels))
+    # print('accuracy for Perceptron on testing faces: ', trues/len(testlabels))
 #Naive Bayes for digit data
     traininglabels = load_label('digitdata\\traininglabels')
     traininglabels = [int(i) for i in traininglabels]
@@ -150,8 +154,19 @@ def main():
     classifier = []
     for i in range(10):
         classifier.append(NaiveBayes(28*28,len(trainingclasses[i])/len(trainingimages)))
+    classifier[0].fit(trainingclasses[0])
     for i in range(10):
         classifier[i].fit(trainingclasses[i])
+    trues = 0
+    for i in range(len(testimages)):
+        features = convert_Integer(testimages[i]).flatten()
+        predictions = []
+        for j in range(10):
+            predictions.append(classifier[j].predict(features))
+        prediction = predictions.index(max(predictions))
+        if prediction == testlabels[i]:
+            trues += 1
+    print('accuracy for Perceptron on testing digits: ', trues/len(testlabels))
 
 
 if __name__=="__main__":
