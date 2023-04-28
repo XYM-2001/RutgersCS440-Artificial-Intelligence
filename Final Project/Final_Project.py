@@ -1,6 +1,6 @@
 import os
 import numpy as np
-
+import tensorflow as tf
 
 
 def display_image(image):
@@ -178,27 +178,74 @@ def main():
     # print('accuracy for Perceptron on testing digits: ', trues/len(testlabels))
 
 #Naive Bayes for face data
+    # traininglabels = load_label('facedata\\facedatatrainlabels')
+    # traininglabels = [int(i) for i in traininglabels]
+    # trainingimages = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
+    # testlabels = load_label('facedata\\facedatatestlabels')
+    # testlabels = [int(i) for i in testlabels]
+    # testimages = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
+    # trainingclasses = image_split(trainingimages,traininglabels,2)
+    # classifier = []
+    # for i in range(2):
+    #     classifier.append(NaiveBayes(60*70,len(trainingclasses[i])/len(trainingimages)))
+    # for i in range(2):
+    #     classifier[i].fit(trainingclasses[i])
+    # trues = 0
+    # for i in range(len(testimages)):
+    #     predictions = []
+    #     predictions.append(classifier[0].predict(convert_Integer(testimages[i]).flatten()))
+    #     predictions.append(classifier[1].predict(convert_Integer(testimages[i]).flatten()))
+    #     prediction = predictions.index(max(predictions))
+    #     if prediction == testlabels[i]:
+    #         trues += 1
+    # print('accuracy for naive bayes on testing faces: ', trues/len(testlabels))
+
+#Neural Network using TensorFlow with digit data
+    # traininglabels = load_label('digitdata\\traininglabels')
+    # traininglabels = [int(i) for i in traininglabels]
+    # trainingimages = load_image('digitdata\\trainingimages', len(traininglabels), 28, 28)
+    # trainingimages = [convert_Integer(i).tolist() for i in trainingimages]
+    # testlabels = load_label('digitdata\\testlabels')
+    # testlabels = [int(i) for i in testlabels]
+    # testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
+    # testimages = [convert_Integer(i).tolist() for i in testimages]
+    # model = tf.keras.Sequential([
+    # tf.keras.layers.Flatten(input_shape=(28, 28)),
+    # tf.keras.layers.Dense(128, activation='relu'),
+    # tf.keras.layers.Dense(10, activation='softmax')
+    # ])
+    # model.compile(optimizer='adam',
+    #           loss='sparse_categorical_crossentropy',
+    #           metrics=['accuracy'])
+    # model.fit(trainingimages, traininglabels, epochs=10)
+    # test_loss, test_acc = model.evaluate(testimages, testlabels)
+    # print('Neural Nework digit data Test accuracy:', test_acc, 'Test loss:', test_loss)
+    
+#Convolutional Neural Network using TensorFlow with face data
     traininglabels = load_label('facedata\\facedatatrainlabels')
     traininglabels = [int(i) for i in traininglabels]
     trainingimages = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
+    trainingimages = [convert_Integer(i).tolist() for i in trainingimages]
     testlabels = load_label('facedata\\facedatatestlabels')
     testlabels = [int(i) for i in testlabels]
     testimages = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
-    trainingclasses = image_split(trainingimages,traininglabels,2)
-    classifier = []
-    for i in range(2):
-        classifier.append(NaiveBayes(60*70,len(trainingclasses[i])/len(trainingimages)))
-    for i in range(2):
-        classifier[i].fit(trainingclasses[i])
-    trues = 0
-    for i in range(len(testimages)):
-        predictions = []
-        predictions.append(classifier[0].predict(convert_Integer(testimages[i]).flatten()))
-        predictions.append(classifier[1].predict(convert_Integer(testimages[i]).flatten()))
-        prediction = predictions.index(max(predictions))
-        if prediction == testlabels[i]:
-            trues += 1
-    print('accuracy for naive bayes on testing faces: ', trues/len(testlabels))
+    testimages = [convert_Integer(i).tolist() for i in testimages]
+    model = tf.keras.Sequential([
+    tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(70, 60, 1)),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+    model.compile(optimizer='adam',
+              loss='binary_crossentropy',
+              metrics=['accuracy'])
+    model.fit(trainingimages, traininglabels, epochs=10)
+    test_loss, test_acc = model.evaluate(testimages, testlabels)
+    print('Neural Nework facedata Test accuracy:', test_acc, 'Test loss:', test_loss)
 
 if __name__=="__main__":
     main()
