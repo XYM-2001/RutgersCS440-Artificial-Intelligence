@@ -1,5 +1,6 @@
 import numpy as np
-x = np.array([1,2,3,4])
+x = np.array([4,4,4,4])
 y = np.array([2,2,2,2])
-p = np.array([0.000001]*10)
-print(p)    
+a = [x,y]
+a = [i/2 for i in a]
+print(a)
