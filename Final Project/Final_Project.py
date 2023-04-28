@@ -7,11 +7,12 @@ def display_image(image):
     for i in image:
         print(i)
 
-def digit_split(training_set, training_labels):
-    image_classes = [[] for _ in range(10)]
+def image_split(training_set, training_labels, num_class):
+    image_classes = [[] for _ in range(num_class)]
     for i in range(len(training_labels)):
         image_classes[training_labels[i]].append(convert_Integer(training_set[i]).flatten())
     return image_classes
+
 
 class Perceptron:
     def __init__(self, num_features):
@@ -159,7 +160,7 @@ def main():
     # testlabels = load_label('digitdata\\testlabels')
     # testlabels = [int(i) for i in testlabels]
     # testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
-    # trainingclasses = digit_split(trainingimages, traininglabels)
+    # trainingclasses = image_split(trainingimages, traininglabels,10)
     # classifier = []
     # for i in range(10):
     #     classifier.append(NaiveBayes(28*28,len(trainingclasses[i])/len(trainingimages)))
@@ -179,23 +180,23 @@ def main():
 #Naive Bayes for face data
     traininglabels = load_label('facedata\\facedatatrainlabels')
     traininglabels = [int(i) for i in traininglabels]
-    trainingset = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
+    trainingimages = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
     testlabels = load_label('facedata\\facedatatestlabels')
     testlabels = [int(i) for i in testlabels]
-    testset = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
-    prior = traininglabels.count(1)/len(traininglabels)
-    classifier = NaiveBayes(60*70, prior)
-    classifier.fit([convert_Integer(i).flatten() for i in trainingset])
+    testimages = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
+    trainingclasses = image_split(trainingimages,traininglabels,2)
+    classifier = []
+    for i in range(2):
+        classifier.append(NaiveBayes(60*70,len(trainingclasses[i])/len(trainingimages)))
+    for i in range(2):
+        classifier[i].fit(trainingclasses[i])
     trues = 0
-    predictions = []
-    for i in range(len(testset)):
-        predictions.append(classifier.predict(convert_Integer(testset[i]).flatten()))
-        # if (prediction >= 0.5 and testlabels[i] == 1) or prediction < 0.5 and testlabels[i] == 0:
-        #     trues += 1
-    # print('accuracy for Perceptron on testing faces: ', trues/len(testlabels))
-    norm = [float(i)/sum(predictions) for i in predictions]
-    for i in range(len(testlabels)):
-        if (norm[i] >= 0.5 and testlabels[i] == 1) or (norm[i] < 0.5 and testlabels[i] == 0):
+    for i in range(len(testimages)):
+        predictions = []
+        predictions.append(classifier[0].predict(convert_Integer(testimages[i]).flatten()))
+        predictions.append(classifier[1].predict(convert_Integer(testimages[i]).flatten()))
+        prediction = predictions.index(max(predictions))
+        if prediction == testlabels[i]:
             trues += 1
     print('accuracy for naive bayes on testing faces: ', trues/len(testlabels))
 
