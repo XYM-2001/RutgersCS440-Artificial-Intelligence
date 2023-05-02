@@ -133,6 +133,7 @@ def main():
     testfacelabels = load_label('facedata\\facedatatestlabels')
     testfacelabels = [int(i) for i in testfacelabels]
     testfaceimages = load_image('facedata\\facedatatest', len(testfacelabels), 60, 70)
+
 # Perceptron for digit data
     for samplesize in [20,40,60,80,100]:
         accuracy = []
@@ -220,7 +221,7 @@ def main():
         accuracy = []
         speed = []
         for _ in range(5):
-            sampleimages, samplelabels = select_sample(trainingdigitimages, trainingdigitlabels, int(len(trainingdigitlabels)*samplesize/100))
+            sampleimages, samplelabels = select_sample(trainingfaceimages, trainingfacelabels, int(len(trainingfacelabels)*samplesize/100))
             trainingclasses = image_split(sampleimages,samplelabels,2)
             classifier = []
             starttime = time.time()
@@ -245,51 +246,46 @@ def main():
               sum(speed)/len(speed), 'standard deviation-', np.std(speed))
 
 #Neural Network using TensorFlow with digit data
-    # traininglabels = load_label('digitdata\\traininglabels')
-    # traininglabels = [int(i) for i in traininglabels]
-    # trainingimages = load_image('digitdata\\trainingimages', len(traininglabels), 28, 28)
-    # trainingimages = [convert_Integer(i).tolist() for i in trainingimages]
-    # testlabels = load_label('digitdata\\testlabels')
-    # testlabels = [int(i) for i in testlabels]
-    # testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
-    # testimages = [convert_Integer(i).tolist() for i in testimages]
-    # model = tf.keras.Sequential([
-    # tf.keras.layers.Flatten(input_shape=(28, 28)),
-    # tf.keras.layers.Dense(128, activation='relu'),
-    # tf.keras.layers.Dense(10, activation='softmax')
-    # ])
-    # model.compile(optimizer='adam',
-    #           loss='sparse_categorical_crossentropy',
-    #           metrics=['accuracy'])
-    # model.fit(trainingimages, traininglabels, epochs=10)
-    # test_loss, test_acc = model.evaluate(testimages, testlabels)
-    # print('Neural Nework digit data Test accuracy:', test_acc, 'Test loss:', test_loss)
+    trainingdigitimages = [convert_Integer(i).tolist() for i in trainingdigitimages]
+    testdigitimages = [convert_Integer(i).tolist() for i in testdigitimages]
+    for samplesize in [20,40,60,80,100]:
+        sampleimages, samplelabels = select_sample(trainingdigitimages, trainingdigitlabels, int(len(trainingdigitlabels)*samplesize/100))
+        model = tf.keras.Sequential([
+        tf.keras.layers.Flatten(input_shape=(28, 28)),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(10, activation='softmax')
+        ])
+        model.compile(optimizer='adam',
+                loss='sparse_categorical_crossentropy',
+                metrics=['accuracy'])
+        model.fit(sampleimages, samplelabels, epochs=5)
+        test_loss, test_acc = model.evaluate(testdigitimages, testdigitlabels)
+        print('accuracy for Neural Network with Tensorflow on ', samplesize, 'percent digit image for 5 epochs: accuracy-', 
+              test_acc, ' loss-', test_loss)
+        
     
 #Convolutional Neural Network using TensorFlow with face data
-    # traininglabels = load_label('facedata\\facedatatrainlabels')
-    # traininglabels = [int(i) for i in traininglabels]
-    # trainingimages = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
-    # trainingimages = [convert_Integer(i).tolist() for i in trainingimages]
-    # testlabels = load_label('facedata\\facedatatestlabels')
-    # testlabels = [int(i) for i in testlabels]
-    # testimages = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
-    # testimages = [convert_Integer(i).tolist() for i in testimages]
-    # model = tf.keras.Sequential([
-    # tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(70, 60, 1)),
-    # tf.keras.layers.MaxPooling2D((2, 2)),
-    # tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
-    # tf.keras.layers.MaxPooling2D((2, 2)),
-    # tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
-    # tf.keras.layers.Flatten(),
-    # tf.keras.layers.Dense(64, activation='relu'),
-    # tf.keras.layers.Dense(1, activation='sigmoid')
-    # ])
-    # model.compile(optimizer='adam',
-    #           loss='binary_crossentropy',
-    #           metrics=['accuracy'])
-    # model.fit(trainingimages, traininglabels, epochs=10)
-    # test_loss, test_acc = model.evaluate(testimages, testlabels)
-    # print('Neural Nework facedata Test accuracy:', test_acc, 'Test loss:', test_loss)
+    trainingfaceimages = [convert_Integer(i).tolist() for i in trainingfaceimages]
+    testfaceimages = [convert_Integer(i).tolist() for i in testfaceimages]
+    for samplesize in [20,40,60,80,100]:
+        sampleimages, samplelabels = select_sample(trainingfaceimages, trainingfacelabels, int(len(trainingfacelabels)*samplesize/100))
+        model = tf.keras.Sequential([
+        tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(70, 60, 1)),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+        ])
+        model.compile(optimizer='adam',
+                loss='binary_crossentropy',
+                metrics=['accuracy'])
+        model.fit(sampleimages, samplelabels, epochs=5)
+        test_loss, test_acc = model.evaluate(testfaceimages, testfacelabels)
+        print('accuracy for Convolutional Neural Network with Tensorflow on ', samplesize, 'percent face image for 5 epochs: accuracy-', 
+              test_acc, ' loss-', test_loss)
 
 if __name__=="__main__":
     main()
