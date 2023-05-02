@@ -1,11 +1,19 @@
 import os
 import numpy as np
 import tensorflow as tf
+import random
+import time
 
 
 def display_image(image):
     for i in image:
         print(i)
+
+def select_sample(images, labels, sample_size):
+    combined = list(zip(images, labels))
+    sample = random.sample(combined, sample_size)
+    sampleimage, samplelabel = zip(*sample)
+    return list(sampleimage), list(samplelabel)
 
 def image_split(training_set, training_labels, num_class):
     image_classes = [[] for _ in range(num_class)]
@@ -114,26 +122,26 @@ def train_face_model(training_set, training_label, perceptron):
 
 def main():
 # Perceptron for digit data
-    # traininglabels = load_label('digitdata\\traininglabels')
-    # traininglabels = [int(i) for i in traininglabels]
-    # trainingimages = load_image('digitdata\\trainingimages', len(traininglabels), 28, 28)
-    # testlabels = load_label('digitdata\\testlabels')
-    # testlabels = [int(i) for i in testlabels]
-    # testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
-    # perceptrons = []
-    # for i in range(10):
-    #     perceptrons.append(Perceptron(28*28))
-    # perceptrons = train_digit_model(trainingimages, traininglabels, perceptrons)
-    # trues = 0
-    # for i in range(len(testimages)):
-    #     features = convert_Integer(testimages[i]).flatten()
-    #     predictions = []
-    #     for j in range(10):
-    #         predictions.append(perceptrons[j].predict(features))
-    #     prediction = predictions.index(max(predictions))
-    #     if prediction == testlabels[i]:
-    #         trues += 1
-    # print('accuracy for Perceptron on testing digits: ', trues/len(testlabels))
+    traininglabels = load_label('digitdata\\traininglabels')
+    traininglabels = [int(i) for i in traininglabels]
+    trainingimages = load_image('digitdata\\trainingimages', len(traininglabels), 28, 28)
+    testlabels = load_label('digitdata\\testlabels')
+    testlabels = [int(i) for i in testlabels]
+    testimages = load_image('digitdata\\testimages', len(testlabels), 28, 28)
+    perceptrons = []
+    for i in range(10):
+        perceptrons.append(Perceptron(28*28))
+    perceptrons = train_digit_model(trainingimages, traininglabels, perceptrons)
+    trues = 0
+    for i in range(len(testimages)):
+        features = convert_Integer(testimages[i]).flatten()
+        predictions = []
+        for j in range(10):
+            predictions.append(perceptrons[j].predict(features))
+        prediction = predictions.index(max(predictions))
+        if prediction == testlabels[i]:
+            trues += 1
+    print('accuracy for Perceptron on testing digits: ', trues/len(testlabels))
 
 #Perceptron for face data
     # traininglabels = load_label('facedata\\facedatatrainlabels')
@@ -222,30 +230,30 @@ def main():
     # print('Neural Nework digit data Test accuracy:', test_acc, 'Test loss:', test_loss)
     
 #Convolutional Neural Network using TensorFlow with face data
-    traininglabels = load_label('facedata\\facedatatrainlabels')
-    traininglabels = [int(i) for i in traininglabels]
-    trainingimages = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
-    trainingimages = [convert_Integer(i).tolist() for i in trainingimages]
-    testlabels = load_label('facedata\\facedatatestlabels')
-    testlabels = [int(i) for i in testlabels]
-    testimages = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
-    testimages = [convert_Integer(i).tolist() for i in testimages]
-    model = tf.keras.Sequential([
-    tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(70, 60, 1)),
-    tf.keras.layers.MaxPooling2D((2, 2)),
-    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
-    tf.keras.layers.MaxPooling2D((2, 2)),
-    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(1, activation='sigmoid')
-    ])
-    model.compile(optimizer='adam',
-              loss='binary_crossentropy',
-              metrics=['accuracy'])
-    model.fit(trainingimages, traininglabels, epochs=10)
-    test_loss, test_acc = model.evaluate(testimages, testlabels)
-    print('Neural Nework facedata Test accuracy:', test_acc, 'Test loss:', test_loss)
+    # traininglabels = load_label('facedata\\facedatatrainlabels')
+    # traininglabels = [int(i) for i in traininglabels]
+    # trainingimages = load_image('facedata\\facedatatrain', len(traininglabels), 60, 70)
+    # trainingimages = [convert_Integer(i).tolist() for i in trainingimages]
+    # testlabels = load_label('facedata\\facedatatestlabels')
+    # testlabels = [int(i) for i in testlabels]
+    # testimages = load_image('facedata\\facedatatest', len(testlabels), 60, 70)
+    # testimages = [convert_Integer(i).tolist() for i in testimages]
+    # model = tf.keras.Sequential([
+    # tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(70, 60, 1)),
+    # tf.keras.layers.MaxPooling2D((2, 2)),
+    # tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+    # tf.keras.layers.MaxPooling2D((2, 2)),
+    # tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+    # tf.keras.layers.Flatten(),
+    # tf.keras.layers.Dense(64, activation='relu'),
+    # tf.keras.layers.Dense(1, activation='sigmoid')
+    # ])
+    # model.compile(optimizer='adam',
+    #           loss='binary_crossentropy',
+    #           metrics=['accuracy'])
+    # model.fit(trainingimages, traininglabels, epochs=10)
+    # test_loss, test_acc = model.evaluate(testimages, testlabels)
+    # print('Neural Nework facedata Test accuracy:', test_acc, 'Test loss:', test_loss)
 
 if __name__=="__main__":
     main()
