@@ -135,55 +135,55 @@ def main():
     testfaceimages = load_image('facedata\\facedatatest', len(testfacelabels), 60, 70)
 
 # Perceptron for digit data
-#     for samplesize in [20,40,60,80,100]:
-#         accuracy = []
-#         speed = []
-#         for _ in range(5):
-#             perceptrons = []
-#             for i in range(10):
-#                 perceptrons.append(Perceptron(28*28))
-#             sampleimages, samplelabels = select_sample(trainingdigitimages, trainingdigitlabels, int(len(trainingdigitlabels)*samplesize/100))
-#             starttime = time.time()
-#             perceptrons = train_digit_model(sampleimages, samplelabels, perceptrons)
-#             endtime = time.time()-starttime
-#             speed.append(endtime)
-#             trues = 0
-#             for i in range(len(testdigitimages)):
-#                 features = convert_Integer(testdigitimages[i]).flatten()
-#                 predictions = []
-#                 for j in range(10):
-#                     predictions.append(perceptrons[j].predict(features))
-#                 prediction = predictions.index(max(predictions))
-#                 if prediction == testdigitlabels[i]:
-#                     trues += 1
-#             accuracy.append(trues/len(testdigitlabels))
-#         print('accuracy for Perceptron on ', samplesize, 'percent digit image for 5 iterations: mean-', 
-#               sum(accuracy)/len(accuracy), ' standard deviation-', np.std(accuracy))
-#         print('time spent for training Perceptron on ', samplesize, 'percent digit image for 5 iterations: mean-', 
-#               sum(speed)/len(speed), 'standard deviation-', np.std(speed))
+    for samplesize in [20,40,60,80,100]:
+        accuracy = []
+        speed = []
+        for _ in range(5):
+            perceptrons = []
+            for i in range(10):
+                perceptrons.append(Perceptron(28*28))
+            sampleimages, samplelabels = select_sample(trainingdigitimages, trainingdigitlabels, int(len(trainingdigitlabels)*samplesize/100))
+            starttime = time.time()
+            perceptrons = train_digit_model(sampleimages, samplelabels, perceptrons)
+            endtime = time.time()-starttime
+            speed.append(endtime)
+            trues = 0
+            for i in range(len(testdigitimages)):
+                features = convert_Integer(testdigitimages[i]).flatten()
+                predictions = []
+                for j in range(10):
+                    predictions.append(perceptrons[j].predict(features))
+                prediction = predictions.index(max(predictions))
+                if prediction == testdigitlabels[i]:
+                    trues += 1
+            accuracy.append(trues/len(testdigitlabels))
+        print('accuracy for Perceptron on ', samplesize, 'percent digit image for 5 iterations: mean-', 
+              sum(accuracy)/len(accuracy), ' standard deviation-', np.std(accuracy))
+        print('time spent for training Perceptron on ', samplesize, 'percent digit image for 5 iterations: mean-', 
+              sum(speed)/len(speed), 'standard deviation-', np.std(speed))
 
-# #Perceptron for face data
-#     for samplesize in [20,40,60,80,100]:
-#         accuracy = []
-#         speed = []
-#         for _ in range(5):
-#             perceptron = Perceptron(60*70)
-#             sampleimages, samplelabels = select_sample(trainingfaceimages, trainingfacelabels, int(len(trainingfacelabels)*samplesize/100))
-#             starttime = time.time()
-#             perceptron = train_face_model(sampleimages, samplelabels, perceptron)
-#             endtime = starttime-time.time()
-#             trues = 0
-#             for i in range(len(testfaceimages)):
-#                 features = convert_Integer(testfaceimages[i]).flatten()
-#                 prediction = perceptron.predict(features)
-#                 if (prediction >= 0 and testfacelabels[i] == 1) or (prediction < 0 and testfacelabels[i] == 0):
-#                     trues += 1
-#             accuracy.append(trues/len(testfacelabels))
-#             speed.append(endtime)
-#         print('accuracy for Perceptron on ', samplesize, 'percent face image for 5 iterations: mean-', 
-#               sum(accuracy)/len(accuracy), ' standard deviation-', np.std(accuracy))
-#         print('time spent for training Perceptron on ', samplesize, 'percent face image for 5 iterations: mean-', 
-#               sum(speed)/len(speed), 'standard deviation-', np.std(speed))
+#Perceptron for face data
+    for samplesize in [20,40,60,80,100]:
+        accuracy = []
+        speed = []
+        for _ in range(5):
+            perceptron = Perceptron(60*70)
+            sampleimages, samplelabels = select_sample(trainingfaceimages, trainingfacelabels, int(len(trainingfacelabels)*samplesize/100))
+            starttime = time.time()
+            perceptron = train_face_model(sampleimages, samplelabels, perceptron)
+            endtime = starttime-time.time()
+            trues = 0
+            for i in range(len(testfaceimages)):
+                features = convert_Integer(testfaceimages[i]).flatten()
+                prediction = perceptron.predict(features)
+                if (prediction >= 0 and testfacelabels[i] == 1) or (prediction < 0 and testfacelabels[i] == 0):
+                    trues += 1
+            accuracy.append(trues/len(testfacelabels))
+            speed.append(endtime)
+        print('accuracy for Perceptron on ', samplesize, 'percent face image for 5 iterations: mean-', 
+              sum(accuracy)/len(accuracy), ' standard deviation-', np.std(accuracy))
+        print('time spent for training Perceptron on ', samplesize, 'percent face image for 5 iterations: mean-', 
+              sum(speed)/len(speed), 'standard deviation-', np.std(speed))
 
 
 #Naive Bayes for digit data
